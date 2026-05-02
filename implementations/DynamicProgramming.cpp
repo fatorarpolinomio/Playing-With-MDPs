@@ -1,10 +1,9 @@
+#include "Eigen/Core"
 #include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
 #include <random>
 #include <vector>
-
-class TransitionFunction {};
 
 class ValueFunctions {
 private:
@@ -68,9 +67,66 @@ private:
   }
 
 public:
+  // Construtor
+  ValueFunctions(double rewardValue, double discountRate) {
+    this->rewardValue = rewardValue;
+    this->discountRate = discountRate;
+  }
+  // Getters (em breve, vão para o .hpp)
+  double getRewardValue() { return rewardValue; }
+  double getDiscountRate() { return discountRate; }
+  double getRewardReturn() { return rewardReturn; }
+  double getPolicy() { return policy; }
+  double getTransitionFunctionValue() { return transitionFunctionValue; }
+  std::vector<double> getReturns() { return returns; }
+  std::vector<double> getActions() { return actions; }
+  std::vector<double> getStates() { return states; }
+
+  // Setters (em breve, vão para o .hpp)
+  void setRewardValue(double value) { rewardValue = value; }
+  void setDiscountRate(double value) { discountRate = value; }
+  void setRewardReturn(double value) { rewardReturn = value; }
+  void setPolicy(double value) { policy = value; }
+  void setTransitionFunctionValue(double value) {
+    transitionFunctionValue = value;
+  }
+  void setReturns(std::vector<double> value) { returns = value; }
+  void setActions(std::vector<double> value) { actions = value; }
+  void setStates(std::vector<double> value) { states = value; }
+
+  // Aplicando métodos
+  void applyCalculateReturn(double discountRate, double rewardReturn,
+                            std::vector<double> returns) {
+    this->rewardReturn = calculateReturn(discountRate, rewardReturn, returns);
+  }
+  void applyBellmanEquation(double discountRate, double rewardReturn,
+                            std::vector<double> returns,
+                            std::vector<double> states,
+                            std::vector<double> actions) {}
 };
 
-class PolicyEvaluation {
+class DynamicProgramming : public ValueFunctions {
 
-  void applyPolicyEval(double policy, double threshold) {}
+private:
+  double threshold;
+
+  void PolicyEvaluation(double policy, double threshold) {}
+  void PolicyIteration(double threshold) {}
+  void ValueIteration(double threshold) {}
+
+public:
+  // Construtor
+  DynamicProgramming(double rewardValue, double discountRate, double threshold)
+      : ValueFunctions(rewardValue, discountRate), threshold(threshold) {}
+
+  void applyPolicyEval(double policy, double threshold) {
+    PolicyEvaluation(policy, threshold);
+  }
+  void applyPolicyIter(double threshold) { PolicyIteration(threshold); }
+  void applyValueIter(double threshold) { ValueIteration(threshold); }
+
+  // Getters (em breve, vão para o .hpp)
+  double getThreshold() { return threshold; }
+  // Setters (em breve, vão para o .hpp)
+  void setThreshold(double value) { threshold = value; }
 };
