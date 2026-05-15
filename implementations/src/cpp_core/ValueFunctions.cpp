@@ -72,13 +72,6 @@ double ValueFunctions::actionValueFunction(double state, double action,
   return expectedValue;
 }
 
-// Método da interface pública, apenas para aplicar o método
-void ValueFunctions::applyCalculateReturn(double discountRate,
-                                          double rewardReturn,
-                                          std::vector<double> returns) {
-  this->setRewardReturn(calculateReturn(discountRate, rewardReturn, returns));
-}
-
 // Método da interface pública, apenas para aplicar a equação
 double ValueFunctions::applyBellmanEquation(double state, double discountRate,
                                             double rewardValue,

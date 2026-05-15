@@ -13,3 +13,10 @@ double AgentEnvironment::calculateReturn(double discountRate,
   }
   return rewardReturn;
 }
+
+// Método da interface pública, apenas para aplicar o método
+void AgentEnvironment::applyCalculateReturn(double discountRate,
+                                            double rewardReturn,
+                                            std::vector<double> returns) {
+  this->setRewardReturn(calculateReturn(discountRate, rewardReturn, returns));
+}

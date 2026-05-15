@@ -43,6 +43,8 @@ public:
   void setReturns(std::vector<double> returns) { this->returns = returns; }
   void setActions(std::vector<double> actions) { this->actions = actions; }
   void setStates(std::vector<double> states) { this->states = states; }
+  void applyCalculateReturn(double discountRate, double rewardReturn,
+                            std::vector<double> returns);
 };
 
 class ValueFunctions : public AgentEnvironment {
@@ -75,8 +77,6 @@ public:
   }
 
   // Aplicando métodos
-  void applyCalculateReturn(double discountRate, double rewardReturn,
-                            std::vector<double> returns);
   double applyBellmanEquation(double state, double discountRate,
                               double rewardValue,
                               std::vector<double> currentValues,
