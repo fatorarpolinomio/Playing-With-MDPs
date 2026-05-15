@@ -1,5 +1,5 @@
 #include "Eigen/Core"
-#include "MDPs.hpp"
+#include "MDecisionProcess.hpp"
 #include <Eigen/Dense>
 #include <vector>
 
