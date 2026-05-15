@@ -3,57 +3,76 @@
 
 #include <vector>
 
-class ValueFunctions {
+class AgentEnvironment {
 private:
-  double rewardValue;
   double discountRate;
   double rewardReturn;
   double policy;
-  double transitionFunctionValue;
   std::vector<double> returns;
   std::vector<double> actions;
   std::vector<double> states;
-  std::vector<double> currentValues; // Tabela de valores para iterar
-
-  double calculateReturn(double discountRate, double rewardReturn,
-                         std::vector<double> returns);
-  double calculatePolicyProb(double action, double state);
-  double bellmanEquation(double state, double discountRate, double rewardValue,
-                         std::vector<double> currentValues,
-                         std::vector<double> actions,
-                         std::vector<double> returns,
-                         std::vector<double> states);
-  double actionValueFunction(double state, double action,
-                             std::vector<double> currentValues,
-                             std::vector<double> actions,
-                             std::vector<double> returns,
-                             std::vector<double> states);
 
 public:
-  double calculateTransFunc(double actions, double returns, double states);
-  // Construtor
-  ValueFunctions(double rewardValue, double discountRate);
+  double calculateReturn(double discountRate, double rewardReturn,
+                         std::vector<double> returns);
+
+  // Essas aqui vão mudar para cada problema que estaremos modelando
+  // Dependendo da situação, já teremos tudo tabelado na forma de uma matriz
+  // Para cenários onde teremos um grande quantidade de probalidades,
+  // teremos que "automatizar" na forma de um algoritmo
+  virtual double calculatePolicyProb(double action, double state);
+  virtual double calculateTransFunc(double actions, double returns,
+                                    double states);
+
   // Getters
-  double getRewardValue() { return rewardValue; }
   double getDiscountRate() { return discountRate; }
   double getRewardReturn() { return rewardReturn; }
   double getPolicy() { return policy; }
-  double getTransitionFunctionValue() { return transitionFunctionValue; }
   std::vector<double> getReturns() { return returns; }
   std::vector<double> getActions() { return actions; }
   std::vector<double> getStates() { return states; }
 
   // Setters
-  void setRewardValue(double value) { rewardValue = value; }
-  void setDiscountRate(double value) { discountRate = value; }
-  void setRewardReturn(double value) { rewardReturn = value; }
+  void setDiscountRate(double discountRate) {
+    this->discountRate = discountRate;
+  }
+  void setRewardReturn(double rewardReturn) {
+    this->rewardReturn = rewardReturn;
+  }
   void setPolicy(double value) { policy = value; }
+  void setReturns(std::vector<double> returns) { this->returns = returns; }
+  void setActions(std::vector<double> actions) { this->actions = actions; }
+  void setStates(std::vector<double> states) { this->states = states; }
+};
+
+class ValueFunctions : public AgentEnvironment {
+private:
+  double rewardValue;
+  double transitionFunctionValue;
+  std::vector<double> currentValues; // Tabela de valores para iterar
+
+  double bellmanEquation(double state, double discountRate, double rewardValue,
+                         std::vector<double> currentValues,
+                         std::vector<double> actions,
+                         std::vector<double> returns,
+                         std::vector<double> states);
+
+public:
+  double actionValueFunction(double state, double action, double discountRate,
+                             std::vector<double> currentValues,
+                             std::vector<double> returns,
+                             std::vector<double> states);
+  // Construtor
+  ValueFunctions(double rewardValue, double discountRate);
+  // Getters
+  double getRewardValue() { return rewardValue; }
+  double getTransitionFunctionValue() { return transitionFunctionValue; }
+
+  // Setters
+  void setRewardValue(double value) { rewardValue = value; }
   void setTransitionFunctionValue(double value) {
     transitionFunctionValue = value;
   }
-  void setReturns(std::vector<double> value) { returns = value; }
-  void setActions(std::vector<double> value) { actions = value; }
-  void setStates(std::vector<double> value) { states = value; }
 
   // Aplicando métodos
   void applyCalculateReturn(double discountRate, double rewardReturn,
@@ -83,10 +102,11 @@ private:
                        std::vector<double> actions, std::vector<double> returns,
                        std::vector<double> states,
                        std::vector<double> &policyPerState);
-  void ValueIteration(double discountRate, double rewardValue, double threshold,
-                      std::vector<double> &currentValues,
-                      std::vector<double> actions, std::vector<double> returns,
-                      std::vector<double> states);
+  double ValueIteration(double discountRate, double rewardValue,
+                        double threshold, std::vector<double> &currentValues,
+                        std::vector<double> actions,
+                        std::vector<double> returns,
+                        std::vector<double> states);
 
 public:
   // Construtor

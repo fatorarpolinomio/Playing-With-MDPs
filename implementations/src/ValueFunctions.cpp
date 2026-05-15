@@ -1,41 +1,12 @@
 #include "Eigen/Core"
 #include "MDPs.hpp"
 #include <Eigen/Dense>
-#include <cmath>
-#include <iostream>
-#include <random>
 #include <vector>
 
 // Este construtor provavelmente será alterado
 ValueFunctions::ValueFunctions(double rewardValue, double discountRate) {
   this->rewardValue = rewardValue;
-  this->discountRate = discountRate;
-}
-
-// Isso aqui é para calcular o Gt
-double ValueFunctions::calculateReturn(double discountRate, double rewardReturn,
-                                       std::vector<double> returns) {
-  this->rewardReturn = 0;
-  double tempDiscount = discountRate;
-  for (int i = 0; i < returns.size(); i++) {
-    tempDiscount = pow(discountRate, i);
-    this->rewardReturn += tempDiscount * returns[i];
-  }
-  return rewardReturn;
-}
-
-// Essa aqui mudará para cada problema
-double ValueFunctions::calculatePolicyProb(double action, double state) {
-  return 0.0;
-}
-
-// Essa aqui vai mudar para cada problema que estaremos modelando
-// Dependendo da situação, já teremos tudo tabelado na forma de uma matriz
-// Para cenários onde teremos um grande quantidade de probalidades,
-// teremos que "automatizar" na forma de um algoritmo
-double ValueFunctions::calculateTransFunc(double actions, double returns,
-                                          double states) {
-  return 0.0;
+  this->setDiscountRate(discountRate);
 }
 
 // Equação de Bellman para a função de valor.
@@ -75,21 +46,37 @@ double ValueFunctions::bellmanEquation(double state, double discountRate,
   return finalValue;
 }
 
-// TODO: implementar isso aqui e alterar nos algoritmos de
-//  programação dinâmica
+// Equação de Valor de Ação (Q-Value)
+// "Qual o retorno esperado se eu tomar a ação 'action' no estado 'state'?"
 double ValueFunctions::actionValueFunction(double state, double action,
+                                           double discountRate,
                                            std::vector<double> currentValues,
-                                           std::vector<double> actions,
                                            std::vector<double> returns,
                                            std::vector<double> states) {
-  return 0.0;
+  double expectedValue = 0;
+
+  // Loop duplo: representa o somatório para todos os outros
+  // estados e todas as recompensas
+  for (int j = 0; j < states.size(); j++) {
+    for (int k = 0; k < returns.size(); k++) {
+
+      // Usando o parâmetro 'action' diretamente
+      double transProb = calculateTransFunc(action, returns[k], states[j]);
+
+      // Distribuindo a probabilidade de transição
+      expectedValue += transProb * returns[k];
+      expectedValue += transProb * discountRate * currentValues[j];
+    }
+  }
+
+  return expectedValue;
 }
 
 // Método da interface pública, apenas para aplicar o método
 void ValueFunctions::applyCalculateReturn(double discountRate,
                                           double rewardReturn,
                                           std::vector<double> returns) {
-  this->rewardReturn = calculateReturn(discountRate, rewardReturn, returns);
+  this->setRewardReturn(calculateReturn(discountRate, rewardReturn, returns));
 }
 
 // Método da interface pública, apenas para aplicar a equação

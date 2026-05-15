@@ -30,7 +30,6 @@ void DynamicProgramming::PolicyEvaluation(double discountRate,
   }
 }
 
-// TODO: Ajeitar a parte da equação de Bellman (Pergunta: qual a diferença?)
 // Passando policyPerState por referência (&) e retornando void
 void DynamicProgramming::PolicyIteration(double discountRate,
                                          double rewardValue, double threshold,
@@ -51,25 +50,14 @@ void DynamicProgramming::PolicyIteration(double discountRate,
       double oldAction = policyPerState[i];
 
       // Variáveis para encontrar a melhor ação para ESTE estado
-      double bestActionValue = -1e9; // Começa com um valor bem baixo
+      double bestActionValue = -1e9;
       double bestAction = actions[0];
 
-      // Simulamos cada ação possível para ver qual é a melhor
       for (double action : actions) {
-        double expectedActionValue = 0;
 
-        // Calcula a soma (probabilidade * (recompensa + desconto *
-        // valor_futuro))
-        for (int j = 0; j < states.size(); j++) {
-          for (int k = 0; k < returns.size(); k++) {
-            double transProb =
-                calculateTransFunc(action, returns[k], states[j]);
-            expectedActionValue +=
-                transProb * (returns[k] + discountRate * currentValues[j]);
-          }
-        }
+        double expectedActionValue = actionValueFunction(
+            states[i], action, discountRate, currentValues, returns, states);
 
-        // Faz o papel do argmax: guarda a ação que deu o maior resultado
         if (expectedActionValue > bestActionValue) {
           bestActionValue = expectedActionValue;
           bestAction = action;
@@ -94,28 +82,36 @@ void DynamicProgramming::PolicyIteration(double discountRate,
   }
 }
 
-// TODO: Ajeitar a parte da equação de Bellman
-// Eu sem entender nada
-void DynamicProgramming::ValueIteration(double discountRate, double rewardValue,
-                                        double threshold,
-                                        std::vector<double> &currentValues,
-                                        std::vector<double> actions,
-                                        std::vector<double> returns,
-                                        std::vector<double> states) {
+double DynamicProgramming::ValueIteration(double discountRate,
+                                          double rewardValue, double threshold,
+                                          std::vector<double> &currentValues,
+                                          std::vector<double> actions,
+                                          std::vector<double> returns,
+                                          std::vector<double> states) {
   // Inicializa maior que o threshold para entrar no while
   double delta = threshold + 1.0;
   // Encontra o maior valor de "a", que será usado como parâmetro
-  auto maxAction = std::max_element(actions.begin(), actions.end());
+  double maxAction = *std::max_element(actions.begin(), actions.end());
 
   while (delta > threshold) {
     delta = 0.0;
     for (int i = 0; i < states.size(); i++) {
       double value = currentValues[i];
-      currentValues[i] =
-          applyBellmanEquation(states[i], discountRate, rewardValue,
-                               currentValues, actions, returns, states);
+      currentValues[i] = actionValueFunction(states[i], maxAction, discountRate,
+                                             currentValues, returns, states);
       // Atualiza o delta com a maior diferença encontrada NESTA varredura
       delta = std::max(delta, std::abs(value - currentValues[i]));
     }
   }
+
+  double argMax = 0.0;
+  for (double action : actions) {
+
+    double temp = actionValueFunction(states[0], action, discountRate,
+                                      currentValues, returns, states);
+
+    argMax = temp > argMax ? temp : argMax;
+  }
+
+  return argMax;
 }
