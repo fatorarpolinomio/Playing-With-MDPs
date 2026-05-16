@@ -12,7 +12,6 @@ private:
   std::vector<double> actions;
   std::vector<double> states;
 
-public:
   double calculateReturn(double discountRate, double rewardReturn,
                          std::vector<double> returns);
 
@@ -24,6 +23,7 @@ public:
   virtual double calculateTransFunc(double actions, double returns,
                                     double states);
 
+public:
   // Getters
   double getDiscountRate() { return discountRate; }
   double getRewardReturn() { return rewardReturn; }
@@ -45,6 +45,8 @@ public:
   void setStates(std::vector<double> states) { this->states = states; }
   void applyCalculateReturn(double discountRate, double rewardReturn,
                             std::vector<double> returns);
+  double applyCalculatePolicyProb(double action, double state);
+  double applyCalculateTransFunc(double action, double state);
 };
 
 class ValueFunctions : public AgentEnvironment {

@@ -1,6 +1,6 @@
-#include "Eigen/Core"
+
 #include "MDecisionProcess.hpp"
-#include <Eigen/Dense>
+
 #include <vector>
 
 // Este construtor provavelmente será alterado
@@ -23,7 +23,7 @@ double ValueFunctions::bellmanEquation(double state, double discountRate,
   // Primeiro Loop: somatório da probabilidade de tomar a ação "i"
   // no estado "state" sob uma política em específico
   for (int i = 0; i < actions.size(); i++) {
-    double policyProb = calculatePolicyProb(actions[i], state);
+    double policyProb = applyCalculatePolicyProb(actions[i], state);
     double actionExpectedValue = 0;
     // Loop duplo: representa o somatório dado para todos os outros
     // estados e todas as recompensas
@@ -31,7 +31,7 @@ double ValueFunctions::bellmanEquation(double state, double discountRate,
       for (int k = 0; k < returns.size(); k++) {
 
         double transProb =
-            calculateTransFunc(actions[i], returns[k], states[j]);
+            applyCalculateTransFunc(actions[i], returns[k], states[j]);
         // Para ficar mais palatável, decidi "distribuir" a calculateTransFunc()
         // para os membros dos colchetes da equação
         actionExpectedValue += transProb * returns[k];
@@ -61,7 +61,7 @@ double ValueFunctions::actionValueFunction(double state, double action,
     for (int k = 0; k < returns.size(); k++) {
 
       // Usando o parâmetro 'action' diretamente
-      double transProb = calculateTransFunc(action, returns[k], states[j]);
+      double transProb = applyCalculateTransFunc(action, returns[k], states[j]);
 
       // Distribuindo a probabilidade de transição
       expectedValue += transProb * returns[k];
