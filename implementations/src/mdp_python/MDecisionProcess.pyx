@@ -4,9 +4,9 @@ cdef class PyAgentEnvironment:
     cdef AgentEnvironment* c_ae
 
 
-    def __cinit__(self):
-        if type(self) is PyAgentEnvironment:
-            self.c_ae = new AgentEnvironment()
+    def __cinit__(self, *args, **kwargs):
+            if type(self) is PyAgentEnvironment:
+                self.c_ae = new AgentEnvironment()
 
     def __dealloc__(self):
         if self.c_ae is not NULL:
@@ -62,15 +62,22 @@ cdef class PyAgentEnvironment:
 
     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):
         cdef vector[double] c_returns = returns
-        return self.c_ae.calculateReturn(discountRate, rewardReturn, c_returns)
+        self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
+
+    def apply_calculate_policy_prob(self, double action, double state):
+        return self.c_ae.applyCalculatePolicyProb(action, state)
+
+    def apply_calculate_trans_func(self, double actions, double returns, double states):
+        return self.c_ae.applyCalculateTransFunc(actions, returns, states)
 
 
 cdef class PyValueFunctions:
     cdef ValueFunctions* c_vf
 
-    def __cinit__(self, double rewardValue, double discountRate):
-        if type(self) is PyValueFunctions:
-            self.c_vf = new ValueFunctions(rewardValue, discountRate)
+    def __cinit__(self, *args, **kwargs):
+            if type(self) is PyValueFunctions:
+                # Ele pega os dois primeiros argumentos (rewardValue e discountRate)
+                self.c_vf = new ValueFunctions(args[0], args[1])
 
     def __dealloc__(self):
         if self.c_vf is not NULL:
@@ -121,6 +128,14 @@ cdef class PyDynamicProgramming(PyValueFunctions):
     @threshold.setter
     def threshold(self, value):
         (<DynamicProgramming*>self.c_vf).setThreshold(value)
+
+    @property
+    def discount_rate(self):
+        return (<DynamicProgramming*>self.c_vf).getDiscountRate()
+
+    @discount_rate.setter
+    def discount_rate(self, double value):
+        (<DynamicProgramming*>self.c_vf).setDiscountRate(value)
 
     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
 

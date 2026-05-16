@@ -19,9 +19,13 @@ private:
   // Dependendo da situação, já teremos tudo tabelado na forma de uma matriz
   // Para cenários onde teremos um grande quantidade de probalidades,
   // teremos que "automatizar" na forma de um algoritmo
-  virtual double calculatePolicyProb(double action, double state);
+  virtual double calculatePolicyProb(double action, double state) {
+    return 0.0;
+  }
   virtual double calculateTransFunc(double actions, double returns,
-                                    double states);
+                                    double states) {
+    return 0.0;
+  }
 
 public:
   // Getters
@@ -46,7 +50,7 @@ public:
   void applyCalculateReturn(double discountRate, double rewardReturn,
                             std::vector<double> returns);
   double applyCalculatePolicyProb(double action, double state);
-  double applyCalculateTransFunc(double action, double state);
+  double applyCalculateTransFunc(double actions, double returns, double states);
 };
 
 class ValueFunctions : public AgentEnvironment {

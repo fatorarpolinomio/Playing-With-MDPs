@@ -1568,7 +1568,7 @@ struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment {
 };
 
 
-/* "mdp_python/MDecisionProcess.pyx":68
+/* "mdp_python/MDecisionProcess.pyx":74
  * 
  * 
  * cdef class PyValueFunctions:             # <<<<<<<<<<<<<<
@@ -1581,7 +1581,7 @@ struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions {
 };
 
 
-/* "mdp_python/MDecisionProcess.pyx":109
+/* "mdp_python/MDecisionProcess.pyx":116
  * 
  * 
  * cdef class PyDynamicProgramming(PyValueFunctions):             # <<<<<<<<<<<<<<
@@ -1721,9 +1721,24 @@ static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int 
 #define __Pyx_ArgsSlice_FASTCALL(args, start, stop) PyTuple_GetSlice(args, start, stop)
 #endif
 
-/* RaiseArgTupleInvalid.proto */
-static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
-    Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
+/* KeywordStringCheck.proto */
+static CYTHON_INLINE int __Pyx_CheckKeywordStrings(const char* function_name, PyObject *kw);
+
+/* ArgTypeTestFunc.export */
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
+
+/* ArgTypeTest.proto */
+#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
+    ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
+        __Pyx__ArgTypeTest(obj, type, name, exact))
+
+/* MoveIfSupported.proto */
+#if CYTHON_USE_CPP_STD_MOVE
+  #include <utility>
+  #define __PYX_STD_MOVE_IF_SUPPORTED(x) std::move(x)
+#else
+  #define __PYX_STD_MOVE_IF_SUPPORTED(x) x
+#endif
 
 /* py_dict_items.proto (used by OwnedDictNext) */
 static CYTHON_INLINE PyObject* __Pyx_PyDict_Items(PyObject* d);
@@ -1809,31 +1824,12 @@ static CYTHON_INLINE PyObject* __Pyx_CallUnboundCMethod0(__Pyx_CachedCFunction* 
 /* py_dict_values.proto (used by OwnedDictNext) */
 static CYTHON_INLINE PyObject* __Pyx_PyDict_Values(PyObject* d);
 
-/* OwnedDictNext.proto (used by RejectKeywords) */
+/* OwnedDictNext.proto (used by ParseKeywordsImpl) */
 #if CYTHON_AVOID_BORROWED_REFS
 static int __Pyx_PyDict_NextRef(PyObject *p, PyObject **ppos, PyObject **pkey, PyObject **pvalue);
 #else
 CYTHON_INLINE
 static int __Pyx_PyDict_NextRef(PyObject *p, Py_ssize_t *ppos, PyObject **pkey, PyObject **pvalue);
-#endif
-
-/* RejectKeywords.export */
-static void __Pyx_RejectKeywords(const char* function_name, PyObject *kwds);
-
-/* ArgTypeTestFunc.export */
-static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
-
-/* ArgTypeTest.proto */
-#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
-    ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
-        __Pyx__ArgTypeTest(obj, type, name, exact))
-
-/* MoveIfSupported.proto */
-#if CYTHON_USE_CPP_STD_MOVE
-  #include <utility>
-  #define __PYX_STD_MOVE_IF_SUPPORTED(x) std::move(x)
-#else
-  #define __PYX_STD_MOVE_IF_SUPPORTED(x) x
 #endif
 
 /* RaiseDoubleKeywords.proto (used by ParseKeywordsImpl) */
@@ -1887,6 +1883,13 @@ static CYTHON_INLINE int __Pyx_ParseKeywords(
     int ignore_unknown_kwargs
 );
 
+/* RaiseArgTupleInvalid.proto */
+static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
+    Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
+
+/* RejectKeywords.export */
+static void __Pyx_RejectKeywords(const char* function_name, PyObject *kwds);
+
 /* PyTypeError_Check.proto */
 #define __Pyx_PyExc_TypeError_Check(obj)  __Pyx_TypeCheck(obj, PyExc_TypeError)
 
@@ -1935,6 +1938,28 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 
 /* RaiseException.export */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
+/* GetItemInt.proto */
+#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck, has_gil, unsafe_shared)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck, unsafe_shared) :\
+    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
+               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
+#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck, has_gil, unsafe_shared)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck, unsafe_shared) :\
+    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck, int unsafe_shared);
+#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck, has_gil, unsafe_shared)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck, unsafe_shared) :\
+    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck, int unsafe_shared);
+static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
+                                                     int is_list, int wraparound, int boundscheck, int unsafe_shared);
 
 /* AllocateExtensionType.proto */
 static PyObject *__Pyx_AllocateExtensionType(PyTypeObject *t, int is_final);
@@ -2229,24 +2254,7 @@ static void __Pyx_CppExn2PyErr() {
 #define __Pyx_PyObject_LengthHint(o, defaultval)  PyObject_LengthHint(o, defaultval)
 #endif
 
-/* FormatTypeName.proto */
-#if CYTHON_COMPILING_IN_LIMITED_API
-typedef PyObject *__Pyx_TypeName;
-#define __Pyx_FMT_TYPENAME "%U"
-#define __Pyx_DECREF_TypeName(obj) Py_XDECREF(obj)
-#if __PYX_LIMITED_VERSION_HEX >= 0x030d0000
-#define __Pyx_PyType_GetFullyQualifiedName PyType_GetFullyQualifiedName
-#else
-static __Pyx_TypeName __Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp);
-#endif
-#else  // !LIMITED_API
-typedef const char *__Pyx_TypeName;
-#define __Pyx_FMT_TYPENAME "%.200s"
-#define __Pyx_PyType_GetFullyQualifiedName(tp) ((tp)->tp_name)
-#define __Pyx_DECREF_TypeName(obj)
-#endif
-
-/* GCCDiagnostics.proto (used by CIntToPy) */
+/* GCCDiagnostics.proto */
 #if !defined(__INTEL_COMPILER) && defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 #define __Pyx_HAS_GCC_DIAGNOSTIC
 #endif
@@ -2271,6 +2279,23 @@ static int __Pyx_VectorcallBuilder_AddArgStr(const char *key, PyObject *value, P
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyLong_From_long(long value);
+
+/* FormatTypeName.proto */
+#if CYTHON_COMPILING_IN_LIMITED_API
+typedef PyObject *__Pyx_TypeName;
+#define __Pyx_FMT_TYPENAME "%U"
+#define __Pyx_DECREF_TypeName(obj) Py_XDECREF(obj)
+#if __PYX_LIMITED_VERSION_HEX >= 0x030d0000
+#define __Pyx_PyType_GetFullyQualifiedName PyType_GetFullyQualifiedName
+#else
+static __Pyx_TypeName __Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp);
+#endif
+#else  // !LIMITED_API
+typedef const char *__Pyx_TypeName;
+#define __Pyx_FMT_TYPENAME "%.200s"
+#define __Pyx_PyType_GetFullyQualifiedName(tp) ((tp)->tp_name)
+#define __Pyx_DECREF_TypeName(obj)
+#endif
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyLong_As_long(PyObject *);
@@ -2380,7 +2405,7 @@ int __pyx_module_is_main_mdp_python__MDecisionProcess = 0;
 /* #### Code section: global_var ### */
 /* #### Code section: string_decls ### */
 /* #### Code section: decls ### */
-static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self); /* proto */
+static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_args, CYTHON_UNUSED PyObject *__pyx_v_kwargs); /* proto */
 static void __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_2__dealloc__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13discount_rate___get__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self); /* proto */
 static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13discount_rate_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, double __pyx_v_value); /* proto */
@@ -2395,9 +2420,11 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7action
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6states___get__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self); /* proto */
 static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6states_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, PyObject *__pyx_v_states); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_4apply_calculate_return(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, double __pyx_v_discountRate, double __pyx_v_rewardReturn, PyObject *__pyx_v_returns); /* proto */
-static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
-static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, double __pyx_v_rewardValue, double __pyx_v_discountRate); /* proto */
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6apply_calculate_policy_prob(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, double __pyx_v_action, double __pyx_v_state); /* proto */
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8apply_calculate_trans_func(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, double __pyx_v_actions, double __pyx_v_returns, double __pyx_v_states); /* proto */
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_10__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_12__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, PyObject *__pyx_v_args, CYTHON_UNUSED PyObject *__pyx_v_kwargs); /* proto */
 static void __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_2__dealloc__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_value___get__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self); /* proto */
 static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_value_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, double __pyx_v_value); /* proto */
@@ -2410,6 +2437,8 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_10_
 static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, double __pyx_v_rewardValue, double __pyx_v_discountRate, double __pyx_v_threshold); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_9threshold___get__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self); /* proto */
 static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_9threshold_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate___get__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self); /* proto */
+static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, double __pyx_v_value); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_2apply_policy_eval(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, double __pyx_v_discountRate, double __pyx_v_rewardValue, double __pyx_v_threshold, PyObject *__pyx_v_currentValues, PyObject *__pyx_v_actions, PyObject *__pyx_v_returns, PyObject *__pyx_v_states); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_4apply_policy_iteration(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, double __pyx_v_discountRate, double __pyx_v_rewardValue, double __pyx_v_threshold, PyObject *__pyx_v_currentValues, PyObject *__pyx_v_actions, PyObject *__pyx_v_returns, PyObject *__pyx_v_states, PyObject *__pyx_v_policy_per_state); /* proto */
 static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_6apply_value_iteration(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, double __pyx_v_discountRate, double __pyx_v_rewardValue, double __pyx_v_threshold, PyObject *__pyx_v_currentValues, PyObject *__pyx_v_actions, PyObject *__pyx_v_returns, PyObject *__pyx_v_states); /* proto */
@@ -2447,8 +2476,8 @@ typedef struct {
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_items;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_pop;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_values;
-  PyObject *__pyx_codeobj_tab[12];
-  PyObject *__pyx_string_tab[78];
+  PyObject *__pyx_codeobj_tab[14];
+  PyObject *__pyx_string_tab[84];
 /* #### Code section: module_state_contents ### */
 /* CommonTypesMetaclass.module_state_decls */
 PyTypeObject *__pyx_CommonTypesMetaclassType;
@@ -2503,70 +2532,76 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_n_u_PyAgentEnvironment___reduce_cyth __pyx_string_tab[11]
 #define __pyx_n_u_PyAgentEnvironment___setstate_cy __pyx_string_tab[12]
 #define __pyx_n_u_PyAgentEnvironment_apply_calcula __pyx_string_tab[13]
-#define __pyx_n_u_PyDynamicProgramming __pyx_string_tab[14]
-#define __pyx_n_u_PyDynamicProgramming___reduce_cy __pyx_string_tab[15]
-#define __pyx_n_u_PyDynamicProgramming___setstate __pyx_string_tab[16]
-#define __pyx_n_u_PyDynamicProgramming_apply_polic __pyx_string_tab[17]
-#define __pyx_n_u_PyDynamicProgramming_apply_polic_2 __pyx_string_tab[18]
-#define __pyx_n_u_PyDynamicProgramming_apply_value __pyx_string_tab[19]
-#define __pyx_n_u_PyValueFunctions __pyx_string_tab[20]
-#define __pyx_n_u_PyValueFunctions___reduce_cython __pyx_string_tab[21]
-#define __pyx_n_u_PyValueFunctions___setstate_cyth __pyx_string_tab[22]
-#define __pyx_n_u_PyValueFunctions_action_value_fu __pyx_string_tab[23]
-#define __pyx_n_u_PyValueFunctions_apply_bellman_e __pyx_string_tab[24]
-#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[25]
-#define __pyx_n_u_action __pyx_string_tab[26]
-#define __pyx_n_u_action_value_function __pyx_string_tab[27]
-#define __pyx_n_u_actions __pyx_string_tab[28]
-#define __pyx_n_u_apply_bellman_equation __pyx_string_tab[29]
-#define __pyx_n_u_apply_calculate_return __pyx_string_tab[30]
-#define __pyx_n_u_apply_policy_eval __pyx_string_tab[31]
-#define __pyx_n_u_apply_policy_iteration __pyx_string_tab[32]
-#define __pyx_n_u_apply_value_iteration __pyx_string_tab[33]
-#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[34]
-#define __pyx_n_u_c_actions __pyx_string_tab[35]
-#define __pyx_n_u_c_currentValues __pyx_string_tab[36]
-#define __pyx_n_u_c_policy_per_state __pyx_string_tab[37]
-#define __pyx_n_u_c_returns __pyx_string_tab[38]
-#define __pyx_n_u_c_states __pyx_string_tab[39]
-#define __pyx_n_u_cline_in_traceback __pyx_string_tab[40]
-#define __pyx_n_u_currentValues __pyx_string_tab[41]
-#define __pyx_n_u_discountRate __pyx_string_tab[42]
-#define __pyx_n_u_func __pyx_string_tab[43]
-#define __pyx_n_u_getstate __pyx_string_tab[44]
-#define __pyx_n_u_is_coroutine __pyx_string_tab[45]
-#define __pyx_n_u_items __pyx_string_tab[46]
-#define __pyx_n_u_main __pyx_string_tab[47]
-#define __pyx_n_u_mdp_python_MDecisionProcess __pyx_string_tab[48]
-#define __pyx_n_u_module __pyx_string_tab[49]
-#define __pyx_n_u_name __pyx_string_tab[50]
-#define __pyx_n_u_policy_per_state __pyx_string_tab[51]
-#define __pyx_n_u_pop __pyx_string_tab[52]
-#define __pyx_n_u_pyx_state __pyx_string_tab[53]
-#define __pyx_n_u_qualname __pyx_string_tab[54]
-#define __pyx_n_u_reduce __pyx_string_tab[55]
-#define __pyx_n_u_reduce_cython __pyx_string_tab[56]
-#define __pyx_n_u_reduce_ex __pyx_string_tab[57]
-#define __pyx_n_u_returns __pyx_string_tab[58]
-#define __pyx_n_u_rewardReturn __pyx_string_tab[59]
-#define __pyx_n_u_rewardValue __pyx_string_tab[60]
-#define __pyx_n_u_self __pyx_string_tab[61]
-#define __pyx_n_u_set_name __pyx_string_tab[62]
-#define __pyx_n_u_setdefault __pyx_string_tab[63]
-#define __pyx_n_u_setstate __pyx_string_tab[64]
-#define __pyx_n_u_setstate_cython __pyx_string_tab[65]
-#define __pyx_n_u_state __pyx_string_tab[66]
-#define __pyx_n_u_states __pyx_string_tab[67]
-#define __pyx_n_u_test __pyx_string_tab[68]
-#define __pyx_n_u_threshold __pyx_string_tab[69]
-#define __pyx_n_u_values __pyx_string_tab[70]
-#define __pyx_kp_b_iso88591_A_Q_q_q_a_d_AWN_O_kkvvw __pyx_string_tab[71]
-#define __pyx_kp_b_iso88591_A_a_q_1_d_8_T__pp_G_G_Q_Q_R __pyx_string_tab[72]
-#define __pyx_kp_b_iso88591_A_a_q_d_8_T__pp_G_G_H_q __pyx_string_tab[73]
-#define __pyx_kp_b_iso88591_A_a_q_d_q_mS_ooz_F_F_G_q __pyx_string_tab[74]
-#define __pyx_kp_b_iso88591_A_a_q_t5_AWHNJ_ffg __pyx_string_tab[75]
-#define __pyx_kp_b_iso88591_A_t5_Q __pyx_string_tab[76]
-#define __pyx_kp_b_iso88591_Q __pyx_string_tab[77]
+#define __pyx_n_u_PyAgentEnvironment_apply_calcula_2 __pyx_string_tab[14]
+#define __pyx_n_u_PyAgentEnvironment_apply_calcula_3 __pyx_string_tab[15]
+#define __pyx_n_u_PyDynamicProgramming __pyx_string_tab[16]
+#define __pyx_n_u_PyDynamicProgramming___reduce_cy __pyx_string_tab[17]
+#define __pyx_n_u_PyDynamicProgramming___setstate __pyx_string_tab[18]
+#define __pyx_n_u_PyDynamicProgramming_apply_polic __pyx_string_tab[19]
+#define __pyx_n_u_PyDynamicProgramming_apply_polic_2 __pyx_string_tab[20]
+#define __pyx_n_u_PyDynamicProgramming_apply_value __pyx_string_tab[21]
+#define __pyx_n_u_PyValueFunctions __pyx_string_tab[22]
+#define __pyx_n_u_PyValueFunctions___reduce_cython __pyx_string_tab[23]
+#define __pyx_n_u_PyValueFunctions___setstate_cyth __pyx_string_tab[24]
+#define __pyx_n_u_PyValueFunctions_action_value_fu __pyx_string_tab[25]
+#define __pyx_n_u_PyValueFunctions_apply_bellman_e __pyx_string_tab[26]
+#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[27]
+#define __pyx_n_u_action __pyx_string_tab[28]
+#define __pyx_n_u_action_value_function __pyx_string_tab[29]
+#define __pyx_n_u_actions __pyx_string_tab[30]
+#define __pyx_n_u_apply_bellman_equation __pyx_string_tab[31]
+#define __pyx_n_u_apply_calculate_policy_prob __pyx_string_tab[32]
+#define __pyx_n_u_apply_calculate_return __pyx_string_tab[33]
+#define __pyx_n_u_apply_calculate_trans_func __pyx_string_tab[34]
+#define __pyx_n_u_apply_policy_eval __pyx_string_tab[35]
+#define __pyx_n_u_apply_policy_iteration __pyx_string_tab[36]
+#define __pyx_n_u_apply_value_iteration __pyx_string_tab[37]
+#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[38]
+#define __pyx_n_u_c_actions __pyx_string_tab[39]
+#define __pyx_n_u_c_currentValues __pyx_string_tab[40]
+#define __pyx_n_u_c_policy_per_state __pyx_string_tab[41]
+#define __pyx_n_u_c_returns __pyx_string_tab[42]
+#define __pyx_n_u_c_states __pyx_string_tab[43]
+#define __pyx_n_u_cline_in_traceback __pyx_string_tab[44]
+#define __pyx_n_u_currentValues __pyx_string_tab[45]
+#define __pyx_n_u_discountRate __pyx_string_tab[46]
+#define __pyx_n_u_func __pyx_string_tab[47]
+#define __pyx_n_u_getstate __pyx_string_tab[48]
+#define __pyx_n_u_is_coroutine __pyx_string_tab[49]
+#define __pyx_n_u_items __pyx_string_tab[50]
+#define __pyx_n_u_main __pyx_string_tab[51]
+#define __pyx_n_u_mdp_python_MDecisionProcess __pyx_string_tab[52]
+#define __pyx_n_u_module __pyx_string_tab[53]
+#define __pyx_n_u_name __pyx_string_tab[54]
+#define __pyx_n_u_policy_per_state __pyx_string_tab[55]
+#define __pyx_n_u_pop __pyx_string_tab[56]
+#define __pyx_n_u_pyx_state __pyx_string_tab[57]
+#define __pyx_n_u_qualname __pyx_string_tab[58]
+#define __pyx_n_u_reduce __pyx_string_tab[59]
+#define __pyx_n_u_reduce_cython __pyx_string_tab[60]
+#define __pyx_n_u_reduce_ex __pyx_string_tab[61]
+#define __pyx_n_u_returns __pyx_string_tab[62]
+#define __pyx_n_u_rewardReturn __pyx_string_tab[63]
+#define __pyx_n_u_rewardValue __pyx_string_tab[64]
+#define __pyx_n_u_self __pyx_string_tab[65]
+#define __pyx_n_u_set_name __pyx_string_tab[66]
+#define __pyx_n_u_setdefault __pyx_string_tab[67]
+#define __pyx_n_u_setstate __pyx_string_tab[68]
+#define __pyx_n_u_setstate_cython __pyx_string_tab[69]
+#define __pyx_n_u_state __pyx_string_tab[70]
+#define __pyx_n_u_states __pyx_string_tab[71]
+#define __pyx_n_u_test __pyx_string_tab[72]
+#define __pyx_n_u_threshold __pyx_string_tab[73]
+#define __pyx_n_u_values __pyx_string_tab[74]
+#define __pyx_kp_b_iso88591_A_E_a_1 __pyx_string_tab[75]
+#define __pyx_kp_b_iso88591_A_Q_q_q_a_d_AWN_O_kkvvw __pyx_string_tab[76]
+#define __pyx_kp_b_iso88591_A_a_q_1_d_8_T__pp_G_G_Q_Q_R __pyx_string_tab[77]
+#define __pyx_kp_b_iso88591_A_a_q_d_8_T__pp_G_G_H_q __pyx_string_tab[78]
+#define __pyx_kp_b_iso88591_A_a_q_d_q_mS_ooz_F_F_G_q __pyx_string_tab[79]
+#define __pyx_kp_b_iso88591_A_a_q_t5_AWHNJ_ffg __pyx_string_tab[80]
+#define __pyx_kp_b_iso88591_A_t5_0_1 __pyx_string_tab[81]
+#define __pyx_kp_b_iso88591_A_t5_1 __pyx_string_tab[82]
+#define __pyx_kp_b_iso88591_Q __pyx_string_tab[83]
 /* #### Code section: module_state_clear ### */
 #if CYTHON_USE_MODULE_STATE
 static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
@@ -2587,8 +2622,8 @@ static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions);
   Py_CLEAR(clear_module_state->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming);
   Py_CLEAR(clear_module_state->__pyx_type_10mdp_python_16MDecisionProcess_PyDynamicProgramming);
-  for (int i=0; i<12; ++i) { Py_CLEAR(clear_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<78; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<14; ++i) { Py_CLEAR(clear_module_state->__pyx_codeobj_tab[i]); }
+  for (int i=0; i<84; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
 /* #### Code section: module_state_clear_contents ### */
 /* CommonTypesMetaclass.module_state_clear */
 Py_CLEAR(clear_module_state->__pyx_CommonTypesMetaclassType);
@@ -2617,8 +2652,8 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
   Py_VISIT(traverse_module_state->__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions);
   Py_VISIT(traverse_module_state->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming);
   Py_VISIT(traverse_module_state->__pyx_type_10mdp_python_16MDecisionProcess_PyDynamicProgramming);
-  for (int i=0; i<12; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<78; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<14; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_codeobj_tab[i]); }
+  for (int i=0; i<84; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
 /* #### Code section: module_state_traverse_contents ### */
 /* CommonTypesMetaclass.module_state_traverse */
 Py_VISIT(traverse_module_state->__pyx_CommonTypesMetaclassType);
@@ -2965,14 +3000,16 @@ static std::vector<double>  __pyx_convert_vector_from_py_double(PyObject *__pyx_
 /* "mdp_python/MDecisionProcess.pyx":7
  * 
  * 
- *     def __cinit__(self):             # <<<<<<<<<<<<<<
- *         if type(self) is PyAgentEnvironment:
- *             self.c_ae = new AgentEnvironment()
+ *     def __cinit__(self, *args, **kwargs):             # <<<<<<<<<<<<<<
+ *             if type(self) is PyAgentEnvironment:
+ *                 self.c_ae = new AgentEnvironment()
 */
 
 /* Python wrapper */
 static int __pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  CYTHON_UNUSED PyObject *__pyx_v_args = 0;
+  CYTHON_UNUSED PyObject *__pyx_v_kwargs = 0;
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   int __pyx_r;
@@ -2984,18 +3021,23 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_1__cini
   __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return -1;
   #endif
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  if (unlikely(__pyx_nargs > 0)) { __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 0, 0, __pyx_nargs); return -1; }
-  const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
+  const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return -1;
-  if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("__cinit__", __pyx_kwds); return -1;}
-  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self));
+  if (__pyx_kwds_len > 0) {
+    if (unlikely(__Pyx_CheckKeywordStrings("__cinit__", __pyx_kwds) == -1)) return -1;
+  }
+  __Pyx_INCREF(__pyx_args);
+  __pyx_v_args = __pyx_args;
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self), __pyx_v_args, __pyx_v_kwargs);
 
   /* function exit code */
+  __Pyx_DECREF(__pyx_v_args);
+  __Pyx_XDECREF(__pyx_v_kwargs);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self) {
+static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_args, CYTHON_UNUSED PyObject *__pyx_v_kwargs) {
   int __pyx_r;
   int __pyx_t_1;
   AgentEnvironment *__pyx_t_2;
@@ -3005,18 +3047,18 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit
 
   /* "mdp_python/MDecisionProcess.pyx":8
  * 
- *     def __cinit__(self):
- *         if type(self) is PyAgentEnvironment:             # <<<<<<<<<<<<<<
- *             self.c_ae = new AgentEnvironment()
+ *     def __cinit__(self, *args, **kwargs):
+ *             if type(self) is PyAgentEnvironment:             # <<<<<<<<<<<<<<
+ *                 self.c_ae = new AgentEnvironment()
  * 
 */
   __pyx_t_1 = (((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))) == ((PyObject *)__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyAgentEnvironment));
   if (__pyx_t_1) {
 
     /* "mdp_python/MDecisionProcess.pyx":9
- *     def __cinit__(self):
- *         if type(self) is PyAgentEnvironment:
- *             self.c_ae = new AgentEnvironment()             # <<<<<<<<<<<<<<
+ *     def __cinit__(self, *args, **kwargs):
+ *             if type(self) is PyAgentEnvironment:
+ *                 self.c_ae = new AgentEnvironment()             # <<<<<<<<<<<<<<
  * 
  *     def __dealloc__(self):
 */
@@ -3030,9 +3072,9 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit
 
     /* "mdp_python/MDecisionProcess.pyx":8
  * 
- *     def __cinit__(self):
- *         if type(self) is PyAgentEnvironment:             # <<<<<<<<<<<<<<
- *             self.c_ae = new AgentEnvironment()
+ *     def __cinit__(self, *args, **kwargs):
+ *             if type(self) is PyAgentEnvironment:             # <<<<<<<<<<<<<<
+ *                 self.c_ae = new AgentEnvironment()
  * 
 */
   }
@@ -3040,9 +3082,9 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit
   /* "mdp_python/MDecisionProcess.pyx":7
  * 
  * 
- *     def __cinit__(self):             # <<<<<<<<<<<<<<
- *         if type(self) is PyAgentEnvironment:
- *             self.c_ae = new AgentEnvironment()
+ *     def __cinit__(self, *args, **kwargs):             # <<<<<<<<<<<<<<
+ *             if type(self) is PyAgentEnvironment:
+ *                 self.c_ae = new AgentEnvironment()
 */
 
   /* function exit code */
@@ -3056,7 +3098,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment___cinit
 }
 
 /* "mdp_python/MDecisionProcess.pyx":11
- *             self.c_ae = new AgentEnvironment()
+ *                 self.c_ae = new AgentEnvironment()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self.c_ae is not NULL:
@@ -3108,7 +3150,7 @@ static void __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_2__dea
   }
 
   /* "mdp_python/MDecisionProcess.pyx":11
- *             self.c_ae = new AgentEnvironment()
+ *                 self.c_ae = new AgentEnvironment()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self.c_ae is not NULL:
@@ -3900,7 +3942,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6states
  * 
  *     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
- *         return self.c_ae.calculateReturn(discountRate, rewardReturn, c_returns)
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
 */
 
 /* Python wrapper */
@@ -4019,7 +4061,6 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_4
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   std::vector<double>  __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -4029,7 +4070,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_4
  * 
  *     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):
  *         cdef vector[double] c_returns = returns             # <<<<<<<<<<<<<<
- *         return self.c_ae.calculateReturn(discountRate, rewardReturn, c_returns)
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
  * 
 */
   __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
@@ -4038,29 +4079,319 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_4
   /* "mdp_python/MDecisionProcess.pyx":65
  *     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):
  *         cdef vector[double] c_returns = returns
- *         return self.c_ae.calculateReturn(discountRate, rewardReturn, c_returns)             # <<<<<<<<<<<<<<
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)             # <<<<<<<<<<<<<<
  * 
- * 
+ *     def apply_calculate_policy_prob(self, double action, double state):
 */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->c_ae->calculateReturn(__pyx_v_discountRate, __pyx_v_rewardReturn, __pyx_v_c_returns)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
-  goto __pyx_L0;
+  (void)(__pyx_v_self->c_ae->applyCalculateReturn(__pyx_v_discountRate, __pyx_v_rewardReturn, __pyx_v_c_returns));
 
   /* "mdp_python/MDecisionProcess.pyx":63
  *         self.c_ae.setStates(states)
  * 
  *     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
- *         return self.c_ae.calculateReturn(discountRate, rewardReturn, c_returns)
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
+*/
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyAgentEnvironment.apply_calculate_return", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "mdp_python/MDecisionProcess.pyx":67
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
+ * 
+ *     def apply_calculate_policy_prob(self, double action, double state):             # <<<<<<<<<<<<<<
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)
+ * 
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7apply_calculate_policy_prob(PyObject *__pyx_v_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+static PyMethodDef __pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7apply_calculate_policy_prob = {"apply_calculate_policy_prob", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7apply_calculate_policy_prob, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7apply_calculate_policy_prob(PyObject *__pyx_v_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  double __pyx_v_action;
+  double __pyx_v_state;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[2] = {0,0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("apply_calculate_policy_prob (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_SIZE
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_action,&__pyx_mstate_global->__pyx_n_u_state,0};
+    const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 67, __pyx_L3_error)
+    if (__pyx_kwds_len > 0) {
+      switch (__pyx_nargs) {
+        case  2:
+        values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 67, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
+        case  1:
+        values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 67, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      const Py_ssize_t kwd_pos_args = __pyx_nargs;
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_calculate_policy_prob", 0) < (0)) __PYX_ERR(0, 67, __pyx_L3_error)
+      for (Py_ssize_t i = __pyx_nargs; i < 2; i++) {
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_calculate_policy_prob", 1, 2, 2, i); __PYX_ERR(0, 67, __pyx_L3_error) }
+      }
+    } else if (unlikely(__pyx_nargs != 2)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 67, __pyx_L3_error)
+      values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 67, __pyx_L3_error)
+    }
+    __pyx_v_action = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_action == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 67, __pyx_L3_error)
+    __pyx_v_state = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_state == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 67, __pyx_L3_error)
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("apply_calculate_policy_prob", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 67, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+    Py_XDECREF(values[__pyx_temp]);
+  }
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyAgentEnvironment.apply_calculate_policy_prob", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6apply_calculate_policy_prob(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self), __pyx_v_action, __pyx_v_state);
+
+  /* function exit code */
+  for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+    Py_XDECREF(values[__pyx_temp]);
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6apply_calculate_policy_prob(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, double __pyx_v_action, double __pyx_v_state) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("apply_calculate_policy_prob", 0);
+
+  /* "mdp_python/MDecisionProcess.pyx":68
+ * 
+ *     def apply_calculate_policy_prob(self, double action, double state):
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)             # <<<<<<<<<<<<<<
+ * 
+ *     def apply_calculate_trans_func(self, double actions, double returns, double states):
+*/
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_ae->applyCalculatePolicyProb(__pyx_v_action, __pyx_v_state)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "mdp_python/MDecisionProcess.pyx":67
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
+ * 
+ *     def apply_calculate_policy_prob(self, double action, double state):             # <<<<<<<<<<<<<<
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)
+ * 
 */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyAgentEnvironment.apply_calculate_return", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyAgentEnvironment.apply_calculate_policy_prob", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "mdp_python/MDecisionProcess.pyx":70
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)
+ * 
+ *     def apply_calculate_trans_func(self, double actions, double returns, double states):             # <<<<<<<<<<<<<<
+ *         return self.c_ae.applyCalculateTransFunc(actions, returns, states)
+ * 
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9apply_calculate_trans_func(PyObject *__pyx_v_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+static PyMethodDef __pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9apply_calculate_trans_func = {"apply_calculate_trans_func", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9apply_calculate_trans_func, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9apply_calculate_trans_func(PyObject *__pyx_v_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  double __pyx_v_actions;
+  double __pyx_v_returns;
+  double __pyx_v_states;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[3] = {0,0,0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("apply_calculate_trans_func (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_SIZE
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_actions,&__pyx_mstate_global->__pyx_n_u_returns,&__pyx_mstate_global->__pyx_n_u_states,0};
+    const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 70, __pyx_L3_error)
+    if (__pyx_kwds_len > 0) {
+      switch (__pyx_nargs) {
+        case  3:
+        values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 70, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
+        case  2:
+        values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 70, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
+        case  1:
+        values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 70, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      const Py_ssize_t kwd_pos_args = __pyx_nargs;
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_calculate_trans_func", 0) < (0)) __PYX_ERR(0, 70, __pyx_L3_error)
+      for (Py_ssize_t i = __pyx_nargs; i < 3; i++) {
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_calculate_trans_func", 1, 3, 3, i); __PYX_ERR(0, 70, __pyx_L3_error) }
+      }
+    } else if (unlikely(__pyx_nargs != 3)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 70, __pyx_L3_error)
+      values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 70, __pyx_L3_error)
+      values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 70, __pyx_L3_error)
+    }
+    __pyx_v_actions = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_actions == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L3_error)
+    __pyx_v_returns = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_returns == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L3_error)
+    __pyx_v_states = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_states == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L3_error)
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("apply_calculate_trans_func", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 70, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+    Py_XDECREF(values[__pyx_temp]);
+  }
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyAgentEnvironment.apply_calculate_trans_func", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8apply_calculate_trans_func(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self), __pyx_v_actions, __pyx_v_returns, __pyx_v_states);
+
+  /* function exit code */
+  for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+    Py_XDECREF(values[__pyx_temp]);
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8apply_calculate_trans_func(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, double __pyx_v_actions, double __pyx_v_returns, double __pyx_v_states) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("apply_calculate_trans_func", 0);
+
+  /* "mdp_python/MDecisionProcess.pyx":71
+ * 
+ *     def apply_calculate_trans_func(self, double actions, double returns, double states):
+ *         return self.c_ae.applyCalculateTransFunc(actions, returns, states)             # <<<<<<<<<<<<<<
+ * 
+ * 
+*/
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_ae->applyCalculateTransFunc(__pyx_v_actions, __pyx_v_returns, __pyx_v_states)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "mdp_python/MDecisionProcess.pyx":70
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)
+ * 
+ *     def apply_calculate_trans_func(self, double actions, double returns, double states):             # <<<<<<<<<<<<<<
+ *         return self.c_ae.applyCalculateTransFunc(actions, returns, states)
+ * 
+*/
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyAgentEnvironment.apply_calculate_trans_func", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -4075,15 +4406,15 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_4
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_11__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7__reduce_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_11__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_11__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_11__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4109,14 +4440,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("__reduce_cython__", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6__reduce_cython__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self));
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_10__reduce_cython__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self) {
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_10__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
@@ -4156,15 +4487,15 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_6
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9__setstate_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4230,7 +4561,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8__setstate_cython__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self), __pyx_v___pyx_state);
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_12__setstate_cython__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *)__pyx_v_self), __pyx_v___pyx_state);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -4240,7 +4571,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_12__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_10mdp_python_16MDecisionProcess_PyAgentEnvironment *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
@@ -4272,25 +4603,21 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_8
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":71
+/* "mdp_python/MDecisionProcess.pyx":77
  *     cdef ValueFunctions* c_vf
  * 
- *     def __cinit__(self, double rewardValue, double discountRate):             # <<<<<<<<<<<<<<
- *         if type(self) is PyValueFunctions:
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)
+ *     def __cinit__(self, *args, **kwargs):             # <<<<<<<<<<<<<<
+ *             if type(self) is PyValueFunctions:
+ *                 # Ele pega os dois primeiros argumentos (rewardValue e discountRate)
 */
 
 /* Python wrapper */
 static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  double __pyx_v_rewardValue;
-  double __pyx_v_discountRate;
+  PyObject *__pyx_v_args = 0;
+  CYTHON_UNUSED PyObject *__pyx_v_kwargs = 0;
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[2] = {0,0};
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__ (wrapper)", 0);
@@ -4300,124 +4627,99 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_1__cinit_
   __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return -1;
   #endif
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  {
-    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_rewardValue,&__pyx_mstate_global->__pyx_n_u_discountRate,0};
-    const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 71, __pyx_L3_error)
-    if (__pyx_kwds_len > 0) {
-      switch (__pyx_nargs) {
-        case  2:
-        values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 71, __pyx_L3_error)
-        CYTHON_FALLTHROUGH;
-        case  1:
-        values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 71, __pyx_L3_error)
-        CYTHON_FALLTHROUGH;
-        case  0: break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-      const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 71, __pyx_L3_error)
-      for (Py_ssize_t i = __pyx_nargs; i < 2; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, i); __PYX_ERR(0, 71, __pyx_L3_error) }
-      }
-    } else if (unlikely(__pyx_nargs != 2)) {
-      goto __pyx_L5_argtuple_error;
-    } else {
-      values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 71, __pyx_L3_error)
-      values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 71, __pyx_L3_error)
-    }
-    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L3_error)
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L3_error)
+  const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
+  if (unlikely(__pyx_kwds_len < 0)) return -1;
+  if (__pyx_kwds_len > 0) {
+    if (unlikely(__Pyx_CheckKeywordStrings("__cinit__", __pyx_kwds) == -1)) return -1;
   }
-  goto __pyx_L6_skip;
-  __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 71, __pyx_L3_error)
-  __pyx_L6_skip:;
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
-    Py_XDECREF(values[__pyx_temp]);
-  }
-  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyValueFunctions.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return -1;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions___cinit__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *)__pyx_v_self), __pyx_v_rewardValue, __pyx_v_discountRate);
+  __Pyx_INCREF(__pyx_args);
+  __pyx_v_args = __pyx_args;
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions___cinit__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *)__pyx_v_self), __pyx_v_args, __pyx_v_kwargs);
 
   /* function exit code */
-  for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
-    Py_XDECREF(values[__pyx_temp]);
-  }
+  __Pyx_DECREF(__pyx_v_args);
+  __Pyx_XDECREF(__pyx_v_kwargs);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, double __pyx_v_rewardValue, double __pyx_v_discountRate) {
+static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions___cinit__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, PyObject *__pyx_v_args, CYTHON_UNUSED PyObject *__pyx_v_kwargs) {
   int __pyx_r;
+  __Pyx_RefNannyDeclarations
   int __pyx_t_1;
-  ValueFunctions *__pyx_t_2;
+  PyObject *__pyx_t_2 = NULL;
+  double __pyx_t_3;
+  double __pyx_t_4;
+  ValueFunctions *__pyx_t_5;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":72
+  /* "mdp_python/MDecisionProcess.pyx":78
  * 
- *     def __cinit__(self, double rewardValue, double discountRate):
- *         if type(self) is PyValueFunctions:             # <<<<<<<<<<<<<<
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)
- * 
+ *     def __cinit__(self, *args, **kwargs):
+ *             if type(self) is PyValueFunctions:             # <<<<<<<<<<<<<<
+ *                 # Ele pega os dois primeiros argumentos (rewardValue e discountRate)
+ *                 self.c_vf = new ValueFunctions(args[0], args[1])
 */
   __pyx_t_1 = (((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))) == ((PyObject *)__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions));
   if (__pyx_t_1) {
 
-    /* "mdp_python/MDecisionProcess.pyx":73
- *     def __cinit__(self, double rewardValue, double discountRate):
- *         if type(self) is PyValueFunctions:
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)             # <<<<<<<<<<<<<<
+    /* "mdp_python/MDecisionProcess.pyx":80
+ *             if type(self) is PyValueFunctions:
+ *                 # Ele pega os dois primeiros argumentos (rewardValue e discountRate)
+ *                 self.c_vf = new ValueFunctions(args[0], args[1])             # <<<<<<<<<<<<<<
  * 
  *     def __dealloc__(self):
 */
+    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 0, long, 1, __Pyx_PyLong_From_long, 0, 0, 1, 1, __Pyx_ReferenceSharing_FunctionArgument); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 80, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 1, long, 1, __Pyx_PyLong_From_long, 0, 0, 1, 1, __Pyx_ReferenceSharing_FunctionArgument); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_4 = __Pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 80, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     try {
-      __pyx_t_2 = new ValueFunctions(__pyx_v_rewardValue, __pyx_v_discountRate);
+      __pyx_t_5 = new ValueFunctions(__pyx_t_3, __pyx_t_4);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 73, __pyx_L1_error)
+      __PYX_ERR(0, 80, __pyx_L1_error)
     }
-    __pyx_v_self->c_vf = __pyx_t_2;
+    __pyx_v_self->c_vf = __pyx_t_5;
 
-    /* "mdp_python/MDecisionProcess.pyx":72
+    /* "mdp_python/MDecisionProcess.pyx":78
  * 
- *     def __cinit__(self, double rewardValue, double discountRate):
- *         if type(self) is PyValueFunctions:             # <<<<<<<<<<<<<<
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)
- * 
+ *     def __cinit__(self, *args, **kwargs):
+ *             if type(self) is PyValueFunctions:             # <<<<<<<<<<<<<<
+ *                 # Ele pega os dois primeiros argumentos (rewardValue e discountRate)
+ *                 self.c_vf = new ValueFunctions(args[0], args[1])
 */
   }
 
-  /* "mdp_python/MDecisionProcess.pyx":71
+  /* "mdp_python/MDecisionProcess.pyx":77
  *     cdef ValueFunctions* c_vf
  * 
- *     def __cinit__(self, double rewardValue, double discountRate):             # <<<<<<<<<<<<<<
- *         if type(self) is PyValueFunctions:
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)
+ *     def __cinit__(self, *args, **kwargs):             # <<<<<<<<<<<<<<
+ *             if type(self) is PyValueFunctions:
+ *                 # Ele pega os dois primeiros argumentos (rewardValue e discountRate)
 */
 
   /* function exit code */
   __pyx_r = 0;
   goto __pyx_L0;
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyValueFunctions.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":75
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)
+/* "mdp_python/MDecisionProcess.pyx":82
+ *                 self.c_vf = new ValueFunctions(args[0], args[1])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self.c_vf is not NULL:
@@ -4440,7 +4742,7 @@ static void __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_3__deall
 static void __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_2__dealloc__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self) {
   int __pyx_t_1;
 
-  /* "mdp_python/MDecisionProcess.pyx":76
+  /* "mdp_python/MDecisionProcess.pyx":83
  * 
  *     def __dealloc__(self):
  *         if self.c_vf is not NULL:             # <<<<<<<<<<<<<<
@@ -4450,7 +4752,7 @@ static void __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_2__deall
   __pyx_t_1 = (__pyx_v_self->c_vf != NULL);
   if (__pyx_t_1) {
 
-    /* "mdp_python/MDecisionProcess.pyx":77
+    /* "mdp_python/MDecisionProcess.pyx":84
  *     def __dealloc__(self):
  *         if self.c_vf is not NULL:
  *             del self.c_vf             # <<<<<<<<<<<<<<
@@ -4459,7 +4761,7 @@ static void __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_2__deall
 */
     delete __pyx_v_self->c_vf;
 
-    /* "mdp_python/MDecisionProcess.pyx":76
+    /* "mdp_python/MDecisionProcess.pyx":83
  * 
  *     def __dealloc__(self):
  *         if self.c_vf is not NULL:             # <<<<<<<<<<<<<<
@@ -4468,8 +4770,8 @@ static void __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_2__deall
 */
   }
 
-  /* "mdp_python/MDecisionProcess.pyx":75
- *             self.c_vf = new ValueFunctions(rewardValue, discountRate)
+  /* "mdp_python/MDecisionProcess.pyx":82
+ *                 self.c_vf = new ValueFunctions(args[0], args[1])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self.c_vf is not NULL:
@@ -4479,7 +4781,7 @@ static void __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_2__deall
   /* function exit code */
 }
 
-/* "mdp_python/MDecisionProcess.pyx":79
+/* "mdp_python/MDecisionProcess.pyx":86
  *             del self.c_vf
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -4511,7 +4813,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12r
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":81
+  /* "mdp_python/MDecisionProcess.pyx":88
  *     @property
  *     def reward_value(self):
  *         return self.c_vf.getRewardValue()             # <<<<<<<<<<<<<<
@@ -4519,13 +4821,13 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12r
  *     @reward_value.setter
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_vf->getRewardValue()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_vf->getRewardValue()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":79
+  /* "mdp_python/MDecisionProcess.pyx":86
  *             del self.c_vf
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -4544,7 +4846,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12r
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":83
+/* "mdp_python/MDecisionProcess.pyx":90
  *         return self.c_vf.getRewardValue()
  * 
  *     @reward_value.setter             # <<<<<<<<<<<<<<
@@ -4565,7 +4867,7 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_
   __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
   assert(__pyx_arg_value); {
-    __pyx_v_value = __Pyx_PyFloat_AsDouble(__pyx_arg_value); if (unlikely((__pyx_v_value == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
+    __pyx_v_value = __Pyx_PyFloat_AsDouble(__pyx_arg_value); if (unlikely((__pyx_v_value == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4583,7 +4885,7 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_
 static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_value_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, double __pyx_v_value) {
   int __pyx_r;
 
-  /* "mdp_python/MDecisionProcess.pyx":85
+  /* "mdp_python/MDecisionProcess.pyx":92
  *     @reward_value.setter
  *     def reward_value(self, double value):
  *         self.c_vf.setRewardValue(value)             # <<<<<<<<<<<<<<
@@ -4592,7 +4894,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_
 */
   __pyx_v_self->c_vf->setRewardValue(__pyx_v_value);
 
-  /* "mdp_python/MDecisionProcess.pyx":83
+  /* "mdp_python/MDecisionProcess.pyx":90
  *         return self.c_vf.getRewardValue()
  * 
  *     @reward_value.setter             # <<<<<<<<<<<<<<
@@ -4605,7 +4907,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_12reward_
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":87
+/* "mdp_python/MDecisionProcess.pyx":94
  *         self.c_vf.setRewardValue(value)
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -4637,7 +4939,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_25t
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":89
+  /* "mdp_python/MDecisionProcess.pyx":96
  *     @property
  *     def transition_function_value(self):
  *         return self.c_vf.getTransitionFunctionValue()             # <<<<<<<<<<<<<<
@@ -4645,13 +4947,13 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_25t
  *     @transition_function_value.setter
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_vf->getTransitionFunctionValue()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_vf->getTransitionFunctionValue()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 96, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":87
+  /* "mdp_python/MDecisionProcess.pyx":94
  *         self.c_vf.setRewardValue(value)
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -4670,7 +4972,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_25t
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":91
+/* "mdp_python/MDecisionProcess.pyx":98
  *         return self.c_vf.getTransitionFunctionValue()
  * 
  *     @transition_function_value.setter             # <<<<<<<<<<<<<<
@@ -4691,7 +4993,7 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_25transit
   __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
   assert(__pyx_arg_value); {
-    __pyx_v_value = __Pyx_PyFloat_AsDouble(__pyx_arg_value); if (unlikely((__pyx_v_value == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 92, __pyx_L3_error)
+    __pyx_v_value = __Pyx_PyFloat_AsDouble(__pyx_arg_value); if (unlikely((__pyx_v_value == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4709,7 +5011,7 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_16PyValueFunctions_25transit
 static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_25transition_function_value_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *__pyx_v_self, double __pyx_v_value) {
   int __pyx_r;
 
-  /* "mdp_python/MDecisionProcess.pyx":93
+  /* "mdp_python/MDecisionProcess.pyx":100
  *     @transition_function_value.setter
  *     def transition_function_value(self, double value):
  *         self.c_vf.setTransitionFunctionValue(value)             # <<<<<<<<<<<<<<
@@ -4718,7 +5020,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_25transit
 */
   __pyx_v_self->c_vf->setTransitionFunctionValue(__pyx_v_value);
 
-  /* "mdp_python/MDecisionProcess.pyx":91
+  /* "mdp_python/MDecisionProcess.pyx":98
  *         return self.c_vf.getTransitionFunctionValue()
  * 
  *     @transition_function_value.setter             # <<<<<<<<<<<<<<
@@ -4731,7 +5033,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_25transit
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":95
+/* "mdp_python/MDecisionProcess.pyx":102
  *         self.c_vf.setTransitionFunctionValue(value)
  * 
  *     def action_value_function(self, double state, double action, double discountRate, list currentValues, list returns, list states):             # <<<<<<<<<<<<<<
@@ -4783,67 +5085,67 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_state,&__pyx_mstate_global->__pyx_n_u_action,&__pyx_mstate_global->__pyx_n_u_discountRate,&__pyx_mstate_global->__pyx_n_u_currentValues,&__pyx_mstate_global->__pyx_n_u_returns,&__pyx_mstate_global->__pyx_n_u_states,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 95, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 102, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  6:
         values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 102, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 102, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 102, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 102, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 102, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 102, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "action_value_function", 0) < (0)) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "action_value_function", 0) < (0)) __PYX_ERR(0, 102, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 6; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("action_value_function", 1, 6, 6, i); __PYX_ERR(0, 95, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("action_value_function", 1, 6, 6, i); __PYX_ERR(0, 102, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 6)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 102, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 102, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 102, __pyx_L3_error)
       values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 102, __pyx_L3_error)
       values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 102, __pyx_L3_error)
       values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 95, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 102, __pyx_L3_error)
     }
-    __pyx_v_state = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_state == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
-    __pyx_v_action = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_action == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+    __pyx_v_state = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_state == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L3_error)
+    __pyx_v_action = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_action == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L3_error)
+    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L3_error)
     __pyx_v_currentValues = ((PyObject*)values[3]);
     __pyx_v_returns = ((PyObject*)values[4]);
     __pyx_v_states = ((PyObject*)values[5]);
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("action_value_function", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 95, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("action_value_function", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 102, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4854,9 +5156,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 95, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 95, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 95, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 102, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 102, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 102, __pyx_L1_error)
   __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_4action_value_function(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *)__pyx_v_self), __pyx_v_state, __pyx_v_action, __pyx_v_discountRate, __pyx_v_currentValues, __pyx_v_returns, __pyx_v_states);
 
   /* function exit code */
@@ -4889,37 +5191,37 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_4ac
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("action_value_function", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":96
+  /* "mdp_python/MDecisionProcess.pyx":103
  * 
  *     def action_value_function(self, double state, double action, double discountRate, list currentValues, list returns, list states):
  *         cdef vector[double] c_currentValues = currentValues             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
   __pyx_v_c_currentValues = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":97
+  /* "mdp_python/MDecisionProcess.pyx":104
  *     def action_value_function(self, double state, double action, double discountRate, list currentValues, list returns, list states):
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_states = states
  *         return self.c_vf.actionValueFunction(state, action, discountRate, c_currentValues, c_returns, c_states)
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
   __pyx_v_c_returns = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":98
+  /* "mdp_python/MDecisionProcess.pyx":105
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states             # <<<<<<<<<<<<<<
  *         return self.c_vf.actionValueFunction(state, action, discountRate, c_currentValues, c_returns, c_states)
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
   __pyx_v_c_states = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":99
+  /* "mdp_python/MDecisionProcess.pyx":106
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
  *         return self.c_vf.actionValueFunction(state, action, discountRate, c_currentValues, c_returns, c_states)             # <<<<<<<<<<<<<<
@@ -4927,13 +5229,13 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_4ac
  *     def apply_bellman_equation(self, double state, double discountRate, double rewardValue, list currentValues, list actions, list returns, list states):
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->c_vf->actionValueFunction(__pyx_v_state, __pyx_v_action, __pyx_v_discountRate, __pyx_v_c_currentValues, __pyx_v_c_returns, __pyx_v_c_states)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->c_vf->actionValueFunction(__pyx_v_state, __pyx_v_action, __pyx_v_discountRate, __pyx_v_c_currentValues, __pyx_v_c_returns, __pyx_v_c_states)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":95
+  /* "mdp_python/MDecisionProcess.pyx":102
  *         self.c_vf.setTransitionFunctionValue(value)
  * 
  *     def action_value_function(self, double state, double action, double discountRate, list currentValues, list returns, list states):             # <<<<<<<<<<<<<<
@@ -4952,7 +5254,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_4ac
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":101
+/* "mdp_python/MDecisionProcess.pyx":108
  *         return self.c_vf.actionValueFunction(state, action, discountRate, c_currentValues, c_returns, c_states)
  * 
  *     def apply_bellman_equation(self, double state, double discountRate, double rewardValue, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
@@ -5005,66 +5307,66 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_state,&__pyx_mstate_global->__pyx_n_u_discountRate,&__pyx_mstate_global->__pyx_n_u_rewardValue,&__pyx_mstate_global->__pyx_n_u_currentValues,&__pyx_mstate_global->__pyx_n_u_actions,&__pyx_mstate_global->__pyx_n_u_returns,&__pyx_mstate_global->__pyx_n_u_states,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 101, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 108, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  7:
         values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  6:
         values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 101, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 108, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_bellman_equation", 0) < (0)) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_bellman_equation", 0) < (0)) __PYX_ERR(0, 108, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 7; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_bellman_equation", 1, 7, 7, i); __PYX_ERR(0, 101, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_bellman_equation", 1, 7, 7, i); __PYX_ERR(0, 108, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 7)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 108, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 108, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 108, __pyx_L3_error)
       values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 108, __pyx_L3_error)
       values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 108, __pyx_L3_error)
       values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 108, __pyx_L3_error)
       values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 101, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 108, __pyx_L3_error)
     }
-    __pyx_v_state = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_state == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
-    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+    __pyx_v_state = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_state == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L3_error)
+    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L3_error)
+    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L3_error)
     __pyx_v_currentValues = ((PyObject*)values[3]);
     __pyx_v_actions = ((PyObject*)values[4]);
     __pyx_v_returns = ((PyObject*)values[5]);
@@ -5072,7 +5374,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("apply_bellman_equation", 1, 7, 7, __pyx_nargs); __PYX_ERR(0, 101, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("apply_bellman_equation", 1, 7, 7, __pyx_nargs); __PYX_ERR(0, 108, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5083,10 +5385,10 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 101, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 101, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 101, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 101, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 108, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 108, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 108, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 108, __pyx_L1_error)
   __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_6apply_bellman_equation(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyValueFunctions *)__pyx_v_self), __pyx_v_state, __pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_currentValues, __pyx_v_actions, __pyx_v_returns, __pyx_v_states);
 
   /* function exit code */
@@ -5120,47 +5422,47 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_6ap
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("apply_bellman_equation", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":102
+  /* "mdp_python/MDecisionProcess.pyx":109
  * 
  *     def apply_bellman_equation(self, double state, double discountRate, double rewardValue, list currentValues, list actions, list returns, list states):
  *        cdef vector[double] c_currentValues = currentValues             # <<<<<<<<<<<<<<
  *        cdef vector[double] c_actions = actions
  *        cdef vector[double] c_returns = returns
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 109, __pyx_L1_error)
   __pyx_v_c_currentValues = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":103
+  /* "mdp_python/MDecisionProcess.pyx":110
  *     def apply_bellman_equation(self, double state, double discountRate, double rewardValue, list currentValues, list actions, list returns, list states):
  *        cdef vector[double] c_currentValues = currentValues
  *        cdef vector[double] c_actions = actions             # <<<<<<<<<<<<<<
  *        cdef vector[double] c_returns = returns
  *        cdef vector[double] c_states = states
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
   __pyx_v_c_actions = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":104
+  /* "mdp_python/MDecisionProcess.pyx":111
  *        cdef vector[double] c_currentValues = currentValues
  *        cdef vector[double] c_actions = actions
  *        cdef vector[double] c_returns = returns             # <<<<<<<<<<<<<<
  *        cdef vector[double] c_states = states
  *        return self.c_vf.applyBellmanEquation(state, discountRate, rewardValue, c_currentValues, c_actions, c_returns, c_states)
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
   __pyx_v_c_returns = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":105
+  /* "mdp_python/MDecisionProcess.pyx":112
  *        cdef vector[double] c_actions = actions
  *        cdef vector[double] c_returns = returns
  *        cdef vector[double] c_states = states             # <<<<<<<<<<<<<<
  *        return self.c_vf.applyBellmanEquation(state, discountRate, rewardValue, c_currentValues, c_actions, c_returns, c_states)
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 112, __pyx_L1_error)
   __pyx_v_c_states = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":106
+  /* "mdp_python/MDecisionProcess.pyx":113
  *        cdef vector[double] c_returns = returns
  *        cdef vector[double] c_states = states
  *        return self.c_vf.applyBellmanEquation(state, discountRate, rewardValue, c_currentValues, c_actions, c_returns, c_states)             # <<<<<<<<<<<<<<
@@ -5168,13 +5470,13 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_6ap
  * 
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->c_vf->applyBellmanEquation(__pyx_v_state, __pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_c_currentValues, __pyx_v_c_actions, __pyx_v_c_returns, __pyx_v_c_states)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->c_vf->applyBellmanEquation(__pyx_v_state, __pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_c_currentValues, __pyx_v_c_actions, __pyx_v_c_returns, __pyx_v_c_states)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 113, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":101
+  /* "mdp_python/MDecisionProcess.pyx":108
  *         return self.c_vf.actionValueFunction(state, action, discountRate, c_currentValues, c_returns, c_states)
  * 
  *     def apply_bellman_equation(self, double state, double discountRate, double rewardValue, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
@@ -5397,7 +5699,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_16PyValueFunctions_10_
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":111
+/* "mdp_python/MDecisionProcess.pyx":118
  * cdef class PyDynamicProgramming(PyValueFunctions):
  * 
  *     def __cinit__(self, double rewardValue, double discountRate, double threshold):             # <<<<<<<<<<<<<<
@@ -5429,46 +5731,46 @@ static int __pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_1__ci
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_rewardValue,&__pyx_mstate_global->__pyx_n_u_discountRate,&__pyx_mstate_global->__pyx_n_u_threshold,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 111, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 118, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  3:
         values[2] = __Pyx_ArgRef_VARARGS(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 111, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 118, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 111, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 118, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 111, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 118, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 111, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 118, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 3; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 3, 3, i); __PYX_ERR(0, 111, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 3, 3, i); __PYX_ERR(0, 118, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 111, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 118, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 111, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 118, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_VARARGS(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 111, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 118, __pyx_L3_error)
     }
-    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
-    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
+    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L3_error)
+    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L3_error)
+    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 111, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 118, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5496,7 +5798,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming___cin
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":113
+  /* "mdp_python/MDecisionProcess.pyx":120
  *     def __cinit__(self, double rewardValue, double discountRate, double threshold):
  *         # Cast para ValueFunctions* para guardar no ponteiro da classe pai
  *         self.c_vf = <ValueFunctions*> new DynamicProgramming(rewardValue, discountRate, threshold)             # <<<<<<<<<<<<<<
@@ -5507,11 +5809,11 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming___cin
     __pyx_t_1 = new DynamicProgramming(__pyx_v_rewardValue, __pyx_v_discountRate, __pyx_v_threshold);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 113, __pyx_L1_error)
+    __PYX_ERR(0, 120, __pyx_L1_error)
   }
   __pyx_v_self->__pyx_base.c_vf = ((ValueFunctions *)__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":111
+  /* "mdp_python/MDecisionProcess.pyx":118
  * cdef class PyDynamicProgramming(PyValueFunctions):
  * 
  *     def __cinit__(self, double rewardValue, double discountRate, double threshold):             # <<<<<<<<<<<<<<
@@ -5529,7 +5831,7 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming___cin
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":117
+/* "mdp_python/MDecisionProcess.pyx":124
  * 
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -5561,7 +5863,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":119
+  /* "mdp_python/MDecisionProcess.pyx":126
  *     @property
  *     def threshold(self):
  *         return (<DynamicProgramming*>self.c_vf).getThreshold()             # <<<<<<<<<<<<<<
@@ -5569,13 +5871,13 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
  *     @threshold.setter
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->getThreshold()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->getThreshold()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":117
+  /* "mdp_python/MDecisionProcess.pyx":124
  * 
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -5594,7 +5896,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":121
+/* "mdp_python/MDecisionProcess.pyx":128
  *         return (<DynamicProgramming*>self.c_vf).getThreshold()
  * 
  *     @threshold.setter             # <<<<<<<<<<<<<<
@@ -5624,17 +5926,17 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_9thre
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":123
+  /* "mdp_python/MDecisionProcess.pyx":130
  *     @threshold.setter
  *     def threshold(self, value):
  *         (<DynamicProgramming*>self.c_vf).setThreshold(value)             # <<<<<<<<<<<<<<
  * 
- *     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
+ *     @property
 */
-  __pyx_t_1 = __Pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
   ((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->setThreshold(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":121
+  /* "mdp_python/MDecisionProcess.pyx":128
  *         return (<DynamicProgramming*>self.c_vf).getThreshold()
  * 
  *     @threshold.setter             # <<<<<<<<<<<<<<
@@ -5652,8 +5954,134 @@ static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_9thre
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":125
+/* "mdp_python/MDecisionProcess.pyx":132
  *         (<DynamicProgramming*>self.c_vf).setThreshold(value)
+ * 
+ *     @property             # <<<<<<<<<<<<<<
+ *     def discount_rate(self):
+ *         return (<DynamicProgramming*>self.c_vf).getDiscountRate()
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate___get__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate___get__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "mdp_python/MDecisionProcess.pyx":134
+ *     @property
+ *     def discount_rate(self):
+ *         return (<DynamicProgramming*>self.c_vf).getDiscountRate()             # <<<<<<<<<<<<<<
+ * 
+ *     @discount_rate.setter
+*/
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->getDiscountRate()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "mdp_python/MDecisionProcess.pyx":132
+ *         (<DynamicProgramming*>self.c_vf).setThreshold(value)
+ * 
+ *     @property             # <<<<<<<<<<<<<<
+ *     def discount_rate(self):
+ *         return (<DynamicProgramming*>self.c_vf).getDiscountRate()
+*/
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyDynamicProgramming.discount_rate.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "mdp_python/MDecisionProcess.pyx":136
+ *         return (<DynamicProgramming*>self.c_vf).getDiscountRate()
+ * 
+ *     @discount_rate.setter             # <<<<<<<<<<<<<<
+ *     def discount_rate(self, double value):
+ *         (<DynamicProgramming*>self.c_vf).setDiscountRate(value)
+*/
+
+/* Python wrapper */
+static int __pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_arg_value); /*proto*/
+static int __pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_arg_value) {
+  double __pyx_v_value;
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  assert(__pyx_arg_value); {
+    __pyx_v_value = __Pyx_PyFloat_AsDouble(__pyx_arg_value); if (unlikely((__pyx_v_value == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("mdp_python.MDecisionProcess.PyDynamicProgramming.discount_rate.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return -1;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_2__set__(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *)__pyx_v_self), ((double)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_2__set__(struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *__pyx_v_self, double __pyx_v_value) {
+  int __pyx_r;
+
+  /* "mdp_python/MDecisionProcess.pyx":138
+ *     @discount_rate.setter
+ *     def discount_rate(self, double value):
+ *         (<DynamicProgramming*>self.c_vf).setDiscountRate(value)             # <<<<<<<<<<<<<<
+ * 
+ *     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
+*/
+  ((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->setDiscountRate(__pyx_v_value);
+
+  /* "mdp_python/MDecisionProcess.pyx":136
+ *         return (<DynamicProgramming*>self.c_vf).getDiscountRate()
+ * 
+ *     @discount_rate.setter             # <<<<<<<<<<<<<<
+ *     def discount_rate(self, double value):
+ *         (<DynamicProgramming*>self.c_vf).setDiscountRate(value)
+*/
+
+  /* function exit code */
+  __pyx_r = 0;
+  return __pyx_r;
+}
+
+/* "mdp_python/MDecisionProcess.pyx":140
+ *         (<DynamicProgramming*>self.c_vf).setDiscountRate(value)
  * 
  *     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
  * 
@@ -5705,66 +6133,66 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_discountRate,&__pyx_mstate_global->__pyx_n_u_rewardValue,&__pyx_mstate_global->__pyx_n_u_threshold,&__pyx_mstate_global->__pyx_n_u_currentValues,&__pyx_mstate_global->__pyx_n_u_actions,&__pyx_mstate_global->__pyx_n_u_returns,&__pyx_mstate_global->__pyx_n_u_states,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 125, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 140, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  7:
         values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  6:
         values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 140, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_policy_eval", 0) < (0)) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_policy_eval", 0) < (0)) __PYX_ERR(0, 140, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 7; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_policy_eval", 1, 7, 7, i); __PYX_ERR(0, 125, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_policy_eval", 1, 7, 7, i); __PYX_ERR(0, 140, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 7)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 140, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 140, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 140, __pyx_L3_error)
       values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 140, __pyx_L3_error)
       values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 140, __pyx_L3_error)
       values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 140, __pyx_L3_error)
       values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 125, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 140, __pyx_L3_error)
     }
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 125, __pyx_L3_error)
-    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 125, __pyx_L3_error)
-    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 125, __pyx_L3_error)
+    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
+    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L3_error)
     __pyx_v_currentValues = ((PyObject*)values[3]);
     __pyx_v_actions = ((PyObject*)values[4]);
     __pyx_v_returns = ((PyObject*)values[5]);
@@ -5772,7 +6200,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("apply_policy_eval", 1, 7, 7, __pyx_nargs); __PYX_ERR(0, 125, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("apply_policy_eval", 1, 7, 7, __pyx_nargs); __PYX_ERR(0, 140, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5783,10 +6211,10 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 125, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 125, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 125, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 125, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 140, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 140, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 140, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 140, __pyx_L1_error)
   __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_2apply_policy_eval(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *)__pyx_v_self), __pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_threshold, __pyx_v_currentValues, __pyx_v_actions, __pyx_v_returns, __pyx_v_states);
 
   /* function exit code */
@@ -5820,47 +6248,47 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("apply_policy_eval", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":127
+  /* "mdp_python/MDecisionProcess.pyx":142
  *     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
  * 
  *         cdef vector[double] c_currentValues = currentValues             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L1_error)
   __pyx_v_c_currentValues = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":128
+  /* "mdp_python/MDecisionProcess.pyx":143
  * 
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L1_error)
   __pyx_v_c_returns = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":129
+  /* "mdp_python/MDecisionProcess.pyx":144
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_actions = actions
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 144, __pyx_L1_error)
   __pyx_v_c_states = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":130
+  /* "mdp_python/MDecisionProcess.pyx":145
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions             # <<<<<<<<<<<<<<
  * 
  *         (<DynamicProgramming*>self.c_vf).applyPolicyEval(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states)
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L1_error)
   __pyx_v_c_actions = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":132
+  /* "mdp_python/MDecisionProcess.pyx":147
  *         cdef vector[double] c_actions = actions
  * 
  *         (<DynamicProgramming*>self.c_vf).applyPolicyEval(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states)             # <<<<<<<<<<<<<<
@@ -5869,7 +6297,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
 */
   ((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->applyPolicyEval(__pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_threshold, __pyx_v_c_currentValues, __pyx_v_c_actions, __pyx_v_c_returns, __pyx_v_c_states);
 
-  /* "mdp_python/MDecisionProcess.pyx":134
+  /* "mdp_python/MDecisionProcess.pyx":149
  *         (<DynamicProgramming*>self.c_vf).applyPolicyEval(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states)
  * 
  *         return c_currentValues             # <<<<<<<<<<<<<<
@@ -5877,14 +6305,14 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
  *     def apply_policy_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states, list policy_per_state):
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_convert_vector_to_py_double(__pyx_v_c_currentValues); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_vector_to_py_double(__pyx_v_c_currentValues); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 149, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":125
- *         (<DynamicProgramming*>self.c_vf).setThreshold(value)
+  /* "mdp_python/MDecisionProcess.pyx":140
+ *         (<DynamicProgramming*>self.c_vf).setDiscountRate(value)
  * 
  *     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
  * 
@@ -5902,7 +6330,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":136
+/* "mdp_python/MDecisionProcess.pyx":151
  *         return c_currentValues
  * 
  *     def apply_policy_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states, list policy_per_state):             # <<<<<<<<<<<<<<
@@ -5956,72 +6384,72 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_discountRate,&__pyx_mstate_global->__pyx_n_u_rewardValue,&__pyx_mstate_global->__pyx_n_u_threshold,&__pyx_mstate_global->__pyx_n_u_currentValues,&__pyx_mstate_global->__pyx_n_u_actions,&__pyx_mstate_global->__pyx_n_u_returns,&__pyx_mstate_global->__pyx_n_u_states,&__pyx_mstate_global->__pyx_n_u_policy_per_state,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 136, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 151, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  8:
         values[7] = __Pyx_ArgRef_FASTCALL(__pyx_args, 7);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[7])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[7])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  7:
         values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  6:
         values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 136, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 151, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_policy_iteration", 0) < (0)) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_policy_iteration", 0) < (0)) __PYX_ERR(0, 151, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 8; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_policy_iteration", 1, 8, 8, i); __PYX_ERR(0, 136, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_policy_iteration", 1, 8, 8, i); __PYX_ERR(0, 151, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 8)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 151, __pyx_L3_error)
       values[7] = __Pyx_ArgRef_FASTCALL(__pyx_args, 7);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[7])) __PYX_ERR(0, 136, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[7])) __PYX_ERR(0, 151, __pyx_L3_error)
     }
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 136, __pyx_L3_error)
-    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 136, __pyx_L3_error)
-    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 136, __pyx_L3_error)
+    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L3_error)
+    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L3_error)
+    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L3_error)
     __pyx_v_currentValues = ((PyObject*)values[3]);
     __pyx_v_actions = ((PyObject*)values[4]);
     __pyx_v_returns = ((PyObject*)values[5]);
@@ -6030,7 +6458,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("apply_policy_iteration", 1, 8, 8, __pyx_nargs); __PYX_ERR(0, 136, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("apply_policy_iteration", 1, 8, 8, __pyx_nargs); __PYX_ERR(0, 151, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6041,11 +6469,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 136, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 136, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 136, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 136, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_policy_per_state), (&PyList_Type), 1, "policy_per_state", 1))) __PYX_ERR(0, 136, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 151, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 151, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 151, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 151, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_policy_per_state), (&PyList_Type), 1, "policy_per_state", 1))) __PYX_ERR(0, 151, __pyx_L1_error)
   __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_4apply_policy_iteration(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *)__pyx_v_self), __pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_threshold, __pyx_v_currentValues, __pyx_v_actions, __pyx_v_returns, __pyx_v_states, __pyx_v_policy_per_state);
 
   /* function exit code */
@@ -6082,57 +6510,57 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("apply_policy_iteration", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":137
+  /* "mdp_python/MDecisionProcess.pyx":152
  * 
  *     def apply_policy_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states, list policy_per_state):
  *         cdef vector[double] c_currentValues = currentValues             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 152, __pyx_L1_error)
   __pyx_v_c_currentValues = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":138
+  /* "mdp_python/MDecisionProcess.pyx":153
  *     def apply_policy_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states, list policy_per_state):
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L1_error)
   __pyx_v_c_returns = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":139
+  /* "mdp_python/MDecisionProcess.pyx":154
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_actions = actions
  *         cdef vector[double] c_policy_per_state = policy_per_state
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L1_error)
   __pyx_v_c_states = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":140
+  /* "mdp_python/MDecisionProcess.pyx":155
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_policy_per_state = policy_per_state
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 155, __pyx_L1_error)
   __pyx_v_c_actions = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":141
+  /* "mdp_python/MDecisionProcess.pyx":156
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions
  *         cdef vector[double] c_policy_per_state = policy_per_state             # <<<<<<<<<<<<<<
  * 
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_policy_per_state); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_policy_per_state); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 156, __pyx_L1_error)
   __pyx_v_c_policy_per_state = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":144
+  /* "mdp_python/MDecisionProcess.pyx":159
  * 
  * 
  *         (<DynamicProgramming*>self.c_vf).applyPolicyIter(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states, c_policy_per_state)             # <<<<<<<<<<<<<<
@@ -6141,7 +6569,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
 */
   ((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->applyPolicyIter(__pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_threshold, __pyx_v_c_currentValues, __pyx_v_c_actions, __pyx_v_c_returns, __pyx_v_c_states, __pyx_v_c_policy_per_state);
 
-  /* "mdp_python/MDecisionProcess.pyx":146
+  /* "mdp_python/MDecisionProcess.pyx":161
  *         (<DynamicProgramming*>self.c_vf).applyPolicyIter(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states, c_policy_per_state)
  * 
  *         return c_currentValues, c_policy_per_state             # <<<<<<<<<<<<<<
@@ -6149,23 +6577,23 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
  *     def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_convert_vector_to_py_double(__pyx_v_c_currentValues); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_vector_to_py_double(__pyx_v_c_currentValues); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __pyx_convert_vector_to_py_double(__pyx_v_c_policy_per_state); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_vector_to_py_double(__pyx_v_c_policy_per_state); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2) != (0)) __PYX_ERR(0, 146, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2) != (0)) __PYX_ERR(0, 161, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_3);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3) != (0)) __PYX_ERR(0, 146, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3) != (0)) __PYX_ERR(0, 161, __pyx_L1_error);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":136
+  /* "mdp_python/MDecisionProcess.pyx":151
  *         return c_currentValues
  * 
  *     def apply_policy_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states, list policy_per_state):             # <<<<<<<<<<<<<<
@@ -6186,7 +6614,7 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   return __pyx_r;
 }
 
-/* "mdp_python/MDecisionProcess.pyx":148
+/* "mdp_python/MDecisionProcess.pyx":163
  *         return c_currentValues, c_policy_per_state
  * 
  *     def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
@@ -6239,66 +6667,66 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_discountRate,&__pyx_mstate_global->__pyx_n_u_rewardValue,&__pyx_mstate_global->__pyx_n_u_threshold,&__pyx_mstate_global->__pyx_n_u_currentValues,&__pyx_mstate_global->__pyx_n_u_actions,&__pyx_mstate_global->__pyx_n_u_returns,&__pyx_mstate_global->__pyx_n_u_states,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 148, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 163, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  7:
         values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  6:
         values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 148, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 163, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_value_iteration", 0) < (0)) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "apply_value_iteration", 0) < (0)) __PYX_ERR(0, 163, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 7; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_value_iteration", 1, 7, 7, i); __PYX_ERR(0, 148, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("apply_value_iteration", 1, 7, 7, i); __PYX_ERR(0, 163, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 7)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 163, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 163, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 163, __pyx_L3_error)
       values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 163, __pyx_L3_error)
       values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 163, __pyx_L3_error)
       values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 163, __pyx_L3_error)
       values[6] = __Pyx_ArgRef_FASTCALL(__pyx_args, 6);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 148, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[6])) __PYX_ERR(0, 163, __pyx_L3_error)
     }
-    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 148, __pyx_L3_error)
-    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 148, __pyx_L3_error)
-    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 148, __pyx_L3_error)
+    __pyx_v_discountRate = __Pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_discountRate == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L3_error)
+    __pyx_v_rewardValue = __Pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_rewardValue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L3_error)
+    __pyx_v_threshold = __Pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L3_error)
     __pyx_v_currentValues = ((PyObject*)values[3]);
     __pyx_v_actions = ((PyObject*)values[4]);
     __pyx_v_returns = ((PyObject*)values[5]);
@@ -6306,7 +6734,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("apply_value_iteration", 1, 7, 7, __pyx_nargs); __PYX_ERR(0, 148, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("apply_value_iteration", 1, 7, 7, __pyx_nargs); __PYX_ERR(0, 163, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6317,10 +6745,10 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 148, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 148, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 148, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 148, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_currentValues), (&PyList_Type), 1, "currentValues", 1))) __PYX_ERR(0, 163, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_actions), (&PyList_Type), 1, "actions", 1))) __PYX_ERR(0, 163, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_returns), (&PyList_Type), 1, "returns", 1))) __PYX_ERR(0, 163, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_states), (&PyList_Type), 1, "states", 1))) __PYX_ERR(0, 163, __pyx_L1_error)
   __pyx_r = __pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_6apply_value_iteration(((struct __pyx_obj_10mdp_python_16MDecisionProcess_PyDynamicProgramming *)__pyx_v_self), __pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_threshold, __pyx_v_currentValues, __pyx_v_actions, __pyx_v_returns, __pyx_v_states);
 
   /* function exit code */
@@ -6354,47 +6782,47 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("apply_value_iteration", 0);
 
-  /* "mdp_python/MDecisionProcess.pyx":149
+  /* "mdp_python/MDecisionProcess.pyx":164
  * 
  *     def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
  *         cdef vector[double] c_currentValues = currentValues             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_currentValues); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 164, __pyx_L1_error)
   __pyx_v_c_currentValues = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":150
+  /* "mdp_python/MDecisionProcess.pyx":165
  *     def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 150, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_returns); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 165, __pyx_L1_error)
   __pyx_v_c_returns = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":151
+  /* "mdp_python/MDecisionProcess.pyx":166
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_actions = actions
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_states); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 166, __pyx_L1_error)
   __pyx_v_c_states = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":152
+  /* "mdp_python/MDecisionProcess.pyx":167
  *         cdef vector[double] c_returns = returns
  *         cdef vector[double] c_states = states
  *         cdef vector[double] c_actions = actions             # <<<<<<<<<<<<<<
  * 
  * 
 */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 152, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_actions); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 167, __pyx_L1_error)
   __pyx_v_c_actions = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "mdp_python/MDecisionProcess.pyx":155
+  /* "mdp_python/MDecisionProcess.pyx":170
  * 
  * 
  *         (<DynamicProgramming*>self.c_vf).applyValueIter(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states)             # <<<<<<<<<<<<<<
@@ -6403,19 +6831,19 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
 */
   ((DynamicProgramming *)__pyx_v_self->__pyx_base.c_vf)->applyValueIter(__pyx_v_discountRate, __pyx_v_rewardValue, __pyx_v_threshold, __pyx_v_c_currentValues, __pyx_v_c_actions, __pyx_v_c_returns, __pyx_v_c_states);
 
-  /* "mdp_python/MDecisionProcess.pyx":157
+  /* "mdp_python/MDecisionProcess.pyx":172
  *         (<DynamicProgramming*>self.c_vf).applyValueIter(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states)
  * 
  *         return c_currentValues             # <<<<<<<<<<<<<<
 */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_convert_vector_to_py_double(__pyx_v_c_currentValues); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_vector_to_py_double(__pyx_v_c_currentValues); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "mdp_python/MDecisionProcess.pyx":148
+  /* "mdp_python/MDecisionProcess.pyx":163
  *         return c_currentValues, c_policy_per_state
  * 
  *     def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
@@ -6639,11 +7067,11 @@ static PyObject *__pyx_pf_10mdp_python_16MDecisionProcess_20PyDynamicProgramming
 }
 /* #### Code section: module_exttypes ### */
 
-static PyObject *__pyx_tp_new_10mdp_python_16MDecisionProcess_PyAgentEnvironment(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_10mdp_python_16MDecisionProcess_PyAgentEnvironment(PyTypeObject *t, PyObject *a, PyObject *k) {
   PyObject *o;
   o = __Pyx_AllocateExtensionType(t, 0);
   if (unlikely(!o)) return 0;
-  if (unlikely(__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_1__cinit__(o, __pyx_mstate_global->__pyx_empty_tuple, NULL) < 0)) goto bad;
+  if (unlikely(__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_1__cinit__(o, a, k) < 0)) goto bad;
   return o;
   bad:
   Py_DECREF(o); o = 0;
@@ -6766,8 +7194,10 @@ static int __pyx_setprop_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_st
 
 static PyMethodDef __pyx_methods_10mdp_python_16MDecisionProcess_PyAgentEnvironment[] = {
   {"apply_calculate_return", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_5apply_calculate_return, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"apply_calculate_policy_prob", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7apply_calculate_policy_prob, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"apply_calculate_trans_func", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9apply_calculate_trans_func, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_11__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -7066,6 +7496,20 @@ static int __pyx_setprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_
   }
 }
 
+static PyObject *__pyx_getprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_discount_rate(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_1__get__(o);
+}
+
+static int __pyx_setprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_discount_rate(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_13discount_rate_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
 static PyMethodDef __pyx_methods_10mdp_python_16MDecisionProcess_PyDynamicProgramming[] = {
   {"apply_policy_eval", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_3apply_policy_eval, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {"apply_policy_iteration", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_5apply_policy_iteration, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
@@ -7077,6 +7521,7 @@ static PyMethodDef __pyx_methods_10mdp_python_16MDecisionProcess_PyDynamicProgra
 
 static struct PyGetSetDef __pyx_getsets_10mdp_python_16MDecisionProcess_PyDynamicProgramming[] = {
   {"threshold", __pyx_getprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_threshold, __pyx_setprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_threshold, 0, 0},
+  {"discount_rate", __pyx_getprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_discount_rate, __pyx_setprop_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_discount_rate, 0, 0},
   {0, 0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
@@ -7245,15 +7690,15 @@ static int __Pyx_modinit_type_init_code(__pyx_mstatetype *__pyx_mstate) {
   if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment, (PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyAgentEnvironment) < (0)) __PYX_ERR(0, 3, __pyx_L1_error)
   if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyAgentEnvironment) < (0)) __PYX_ERR(0, 3, __pyx_L1_error)
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions)) __PYX_ERR(0, 68, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions_spec, __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions)) __PYX_ERR(0, 74, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions_spec, __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 74, __pyx_L1_error)
   #else
   __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions = &__pyx_type_10mdp_python_16MDecisionProcess_PyValueFunctions;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 68, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 74, __pyx_L1_error)
   #endif
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount((PyObject*)__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions);
@@ -7263,15 +7708,15 @@ static int __Pyx_modinit_type_init_code(__pyx_mstatetype *__pyx_mstate) {
     __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions->tp_getattro = PyObject_GenericGetAttr;
   }
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_PyValueFunctions, (PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 68, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 68, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_PyValueFunctions, (PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 74, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions) < (0)) __PYX_ERR(0, 74, __pyx_L1_error)
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_t_1 = PyTuple_Pack(1, (PyObject *)__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_Pack(1, (PyObject *)__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_10mdp_python_16MDecisionProcess_PyDynamicProgramming_spec, __pyx_t_1);
   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (unlikely(!__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming)) __PYX_ERR(0, 109, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_10mdp_python_16MDecisionProcess_PyDynamicProgramming_spec, __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 109, __pyx_L1_error)
+  if (unlikely(!__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming)) __PYX_ERR(0, 116, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_10mdp_python_16MDecisionProcess_PyDynamicProgramming_spec, __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 116, __pyx_L1_error)
   #else
   __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming = &__pyx_type_10mdp_python_16MDecisionProcess_PyDynamicProgramming;
   #endif
@@ -7279,7 +7724,7 @@ static int __Pyx_modinit_type_init_code(__pyx_mstatetype *__pyx_mstate) {
   __pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming->tp_base = __pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions;
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 109, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 116, __pyx_L1_error)
   #endif
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount((PyObject*)__pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming);
@@ -7289,8 +7734,8 @@ static int __Pyx_modinit_type_init_code(__pyx_mstatetype *__pyx_mstate) {
     __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming->tp_getattro = PyObject_GenericGetAttr;
   }
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming, (PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 109, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 109, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming, (PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 116, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming) < (0)) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -7597,7 +8042,7 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
  * 
  *     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_returns = returns
- *         return self.c_ae.calculateReturn(discountRate, rewardReturn, c_returns)
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
 */
   __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_5apply_calculate_return, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment_apply_calcula, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -7607,12 +8052,42 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
   if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyAgentEnvironment, __pyx_mstate_global->__pyx_n_u_apply_calculate_return, __pyx_t_2) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
+  /* "mdp_python/MDecisionProcess.pyx":67
+ *         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)
+ * 
+ *     def apply_calculate_policy_prob(self, double action, double state):             # <<<<<<<<<<<<<<
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)
+ * 
+*/
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7apply_calculate_policy_prob, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment_apply_calcula_2, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
+  PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
+  #endif
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyAgentEnvironment, __pyx_mstate_global->__pyx_n_u_apply_calculate_policy_prob, __pyx_t_2) < (0)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "mdp_python/MDecisionProcess.pyx":70
+ *         return self.c_ae.applyCalculatePolicyProb(action, state)
+ * 
+ *     def apply_calculate_trans_func(self, double actions, double returns, double states):             # <<<<<<<<<<<<<<
+ *         return self.c_ae.applyCalculateTransFunc(actions, returns, states)
+ * 
+*/
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9apply_calculate_trans_func, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment_apply_calcula_3, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[2])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
+  PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
+  #endif
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyAgentEnvironment, __pyx_mstate_global->__pyx_n_u_apply_calculate_trans_func, __pyx_t_2) < (0)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
  * def __setstate_cython__(self, __pyx_state):
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_7__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment___reduce_cyth, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_11__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment___reduce_cyth, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[3])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -7626,7 +8101,7 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_9__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment___setstate_cy, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[2])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_18PyAgentEnvironment_13__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyAgentEnvironment___setstate_cy, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[4])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -7634,34 +8109,34 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_setstate_cython, __pyx_t_2) < (0)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":95
+  /* "mdp_python/MDecisionProcess.pyx":102
  *         self.c_vf.setTransitionFunctionValue(value)
  * 
  *     def action_value_function(self, double state, double action, double discountRate, list currentValues, list returns, list states):             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_5action_value_function, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions_action_value_fu, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[3])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_5action_value_function, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions_action_value_fu, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[5])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions, __pyx_mstate_global->__pyx_n_u_action_value_function, __pyx_t_2) < (0)) __PYX_ERR(0, 95, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions, __pyx_mstate_global->__pyx_n_u_action_value_function, __pyx_t_2) < (0)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":101
+  /* "mdp_python/MDecisionProcess.pyx":108
  *         return self.c_vf.actionValueFunction(state, action, discountRate, c_currentValues, c_returns, c_states)
  * 
  *     def apply_bellman_equation(self, double state, double discountRate, double rewardValue, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
  *        cdef vector[double] c_currentValues = currentValues
  *        cdef vector[double] c_actions = actions
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_7apply_bellman_equation, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions_apply_bellman_e, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[4])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_7apply_bellman_equation, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions_apply_bellman_e, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[6])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions, __pyx_mstate_global->__pyx_n_u_apply_bellman_equation, __pyx_t_2) < (0)) __PYX_ERR(0, 101, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyValueFunctions, __pyx_mstate_global->__pyx_n_u_apply_bellman_equation, __pyx_t_2) < (0)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":1
@@ -7669,7 +8144,7 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
  * def __setstate_cython__(self, __pyx_state):
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_9__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions___reduce_cython, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[5])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_9__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions___reduce_cython, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[7])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -7683,7 +8158,7 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_11__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions___setstate_cyth, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[6])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_16PyValueFunctions_11__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyValueFunctions___setstate_cyth, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[8])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -7691,49 +8166,49 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_setstate_cython, __pyx_t_2) < (0)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":125
- *         (<DynamicProgramming*>self.c_vf).setThreshold(value)
+  /* "mdp_python/MDecisionProcess.pyx":140
+ *         (<DynamicProgramming*>self.c_vf).setDiscountRate(value)
  * 
  *     def apply_policy_eval(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
  * 
  *         cdef vector[double] c_currentValues = currentValues
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_3apply_policy_eval, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming_apply_polic, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[7])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_3apply_policy_eval, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming_apply_polic, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[9])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming, __pyx_mstate_global->__pyx_n_u_apply_policy_eval, __pyx_t_2) < (0)) __PYX_ERR(0, 125, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming, __pyx_mstate_global->__pyx_n_u_apply_policy_eval, __pyx_t_2) < (0)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":136
+  /* "mdp_python/MDecisionProcess.pyx":151
  *         return c_currentValues
  * 
  *     def apply_policy_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states, list policy_per_state):             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_5apply_policy_iteration, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming_apply_polic_2, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[8])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_5apply_policy_iteration, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming_apply_polic_2, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[10])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming, __pyx_mstate_global->__pyx_n_u_apply_policy_iteration, __pyx_t_2) < (0)) __PYX_ERR(0, 136, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming, __pyx_mstate_global->__pyx_n_u_apply_policy_iteration, __pyx_t_2) < (0)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mdp_python/MDecisionProcess.pyx":148
+  /* "mdp_python/MDecisionProcess.pyx":163
  *         return c_currentValues, c_policy_per_state
  * 
  *     def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):             # <<<<<<<<<<<<<<
  *         cdef vector[double] c_currentValues = currentValues
  *         cdef vector[double] c_returns = returns
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_7apply_value_iteration, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming_apply_value, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[9])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 148, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_7apply_value_iteration, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming_apply_value, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[11])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming, __pyx_mstate_global->__pyx_n_u_apply_value_iteration, __pyx_t_2) < (0)) __PYX_ERR(0, 148, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_10mdp_python_16MDecisionProcess_PyDynamicProgramming, __pyx_mstate_global->__pyx_n_u_apply_value_iteration, __pyx_t_2) < (0)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":1
@@ -7741,7 +8216,7 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
  * def __setstate_cython__(self, __pyx_state):
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_9__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming___reduce_cy, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[10])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_9__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming___reduce_cy, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[12])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -7755,7 +8230,7 @@ __Pyx_RefNannySetupContext("PyInit_MDecisionProcess", 0);
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_11__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming___setstate, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[11])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10mdp_python_16MDecisionProcess_20PyDynamicProgramming_11__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_PyDynamicProgramming___setstate, NULL, __pyx_mstate_global->__pyx_n_u_mdp_python_MDecisionProcess, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[13])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -7833,39 +8308,39 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
 static int __Pyx_InitConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   {
-    const struct { const unsigned int length: 8; } index[] = {{1},{179},{8},{7},{6},{2},{9},{31},{50},{14},{18},{36},{38},{41},{20},{38},{40},{38},{43},{42},{16},{34},{36},{38},{39},{20},{6},{21},{7},{22},{22},{17},{22},{21},{18},{9},{15},{18},{9},{8},{18},{13},{12},{8},{12},{13},{5},{8},{27},{10},{8},{16},{3},{11},{12},{10},{17},{13},{7},{12},{11},{4},{12},{10},{12},{19},{5},{6},{8},{9},{6},{52},{83},{66},{67},{44},{25},{9}};
-    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (811 bytes) */
-const char* const cstring = "(\265/\375`\316\005\r\031\000\226\350\20370\221\332\300\300\254>*\210\244L1C\216\030\345@\214\007\005e\237Rd\223\024\306\023k\235\"\355\262\016\013\375\237B\225\216\343\236\212\207\271\316\364\232\230\017\211o\360\333\010k\000l\000l\000xJ\177[[J\030rL\341\310[\363\243\337)\337\203\252\316\256v>|[+|x\357\370U_=\206\333\263\377\244{}\234\355^\n\344\205\260o\335\277:\237N\016\365R\366a\307\030\322\210\342\360\303\037}\305\357\223\025\276\212\213\nP\251\243\364\352\365\217\363>~\035\365\207\327Q\223\272|x\276jW\337m\274\207\253\177\376\226\244\021&\316]\377Ia\313\273\213\223\332M\323\340U\305\251\301\332qt\245z\271\367K\271Ha\354\216n\033|\370\370\035w\307\220V\355\235\255\332\361\325U\242\256\224\341\361r\026\337\307\030\335?\353\214\335\217\302\331\232\367A\325VN\276n\217\234\364\333\375\236r0\345\362\331\352\352\266\020\306\036\355-9\207\310\304\326\233\324$\236QU\335)\n\006\254\327\303\300\314\004\003\r\314D3-I\355\n\373]u\247\250\237\344\205-~\333\345t\263[\273\006\253SN\332Pw\235P\353\306Z\343\251\352\356>}\345l\304S\262D\210\362\010\357w\235\355u\322\210c_\337\276\372\275\\\354\210\275\316\347\354\2651dg\254\035\2068\345\247w9\251?N\327|\310\261\274+\324(uT\n\342X\271Q\246\232\010\232\202\200Yg\306t#\023[\200\251R9\205\222QB2I\366\241\220-j\336\3033\032u^\\l\266)9\205$k7\0062V\354\000\306\242\371X \300\301\021\315t^\357 \037|p<'\217\311\344\361\360xt`\000\000r^\266\274u\356\222\034s\263 \353\310. \262\303K\3320\024\000\010\344 \304(>\263\016\014\3423\203\260\320\247\245\225[,\231E%\253\214d\320\r)v\002\023\301$\022rC\215\2441\030\230\301\227Cw\250\221\235Q\010\311\210\310\214H\222\244\2301 D\240\224\263\253\003\261,\n\031!\tD\002\221\021m\013\225a3\017\nOi\367V\243\260'f\031\202Q\302\337\325$\356`\216\220f\377\260\002\255s\201\240\352n\361A0w\241\360\243\3566\315\264\206z\004\0175:9\353\356\347\220\257>\370q$z\3331\177\013'\244\376\210\260\243BF\260\353\336tO\r\365\347\260&\024\254J\031\016h\304K\000\321\253u\245[,bOo \205\356\r\337\257\276h\231\251\265\037`sfG""\341vE\365\213\234\301\000\233h\021Y\364\335j\226\317\373\003\207W\262\007'\307\236\340D\362.qLa+d\000\312y8}\251\010%\006\026\375\217\206\242\tY\240\026apu:\264Nf\251\005\001|Eq\340\246L\031\220O\335H\340\\ ]\212\230T\344\020\305\270\3235_\247\314\336\017r\322J\354\211\276\025\021\252\361Rq\010?\200N\201\361\324}\n\332VB\206Q\003";
-    PyObject *data = __Pyx_DecompressString(cstring, 811, 3);
+    const struct { const unsigned int length: 8; } index[] = {{1},{179},{8},{7},{6},{2},{9},{31},{50},{14},{18},{36},{38},{41},{46},{45},{20},{38},{40},{38},{43},{42},{16},{34},{36},{38},{39},{20},{6},{21},{7},{22},{27},{22},{26},{17},{22},{21},{18},{9},{15},{18},{9},{8},{18},{13},{12},{8},{12},{13},{5},{8},{27},{10},{8},{16},{3},{11},{12},{10},{17},{13},{7},{12},{11},{4},{12},{10},{12},{19},{5},{6},{8},{9},{6},{23},{52},{83},{66},{67},{44},{20},{18},{9}};
+    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (863 bytes) */
+const char* const cstring = "(\265/\375`\202\006\255\032\0006\252\2128 \223\332\000\034\265@R\000\032DM\003\202\320\243\0200hv=\3544\211\354&)|*\255Q\212\264)\351\331\314v\230VBZ\n\303\233\216jl\316\303\235\212\312J5\026q\000r\000r\000\366\277\246b\246\363\365\265>g\024}\256\221\364-\252\345c:\341\204\312R\267\227\352\250\257\265q\002\352\317\320\376J\347\330\301\253\341\374\267\320\273\037\334L\240(\177\367ih\251\256\324K\301\355\302\3749\307*S^\206Y\313\217y\014\247\215p\243c#d\0321A\213_K\212u\206_}\035\361\247h\375\t3\205\366\256\364\027\002u\\i\370\372\226@\0025\266^e)\307E\254\272\330$)\027\355'\362\231\244\3656\3176b\235\272\270\363O\322z;\213=\375\270z\262F\351_\355\272\250\243\316\372\263\273\024q\366b\332\262#\332\276j\364\231>^b\357f\225\365p\327\324R\351\016k\244-\212u\310^\353M\350\376\322\233\217\335\241\256^\334~\302k]_'\312\371\345\305\246\027A\301\350\274\233\334\314T\252\002\260\010\223P\330#\257\003\202\332'FAP\033\345\264f\275\253\374x\345\276\325GM\034g\036\273\353kw;\177.\332\257\336\274\"wK#\347\2369\317T\345\356\216\322\326\2732\323)#c\352\245\245\376\226V\231\245\343\227Y\333\307\330\223.\363[\252\275\213\257\024]*\355\227c\336\036\245]_r-\251\213\352\350\261\336m\344j\375T\314$\226\367\360k\032'\035\213\227A@\355\223\0031\243\220U\314\032d\037Y\206j\333\233\313v9\331\245Y\t\303\346\320\321$ \022\351SCs\367}\331/*\233\243!\314X\262\204\030\353U\342P\300\3033\312\371\300`\302N \340\001\241@\247\023\210\004D\362\261\001\000\350\251\351v\347\333W\366\r\315a\366\231uPl\t\330\334y0\000\020\350Q\220i\304\230h\246\265[2[\006f\303\244\354\020\255$k\211\215b\027\013;Bg\276\020\006j,\330\304@\355\024\013\rh\320^d8\001\177\250\221\035bffdDD$\005M\322\030 D\240\024\263\343\0062\311H\317\"\320\010\210\021\020\242\310TUP\020\303\232\r\016\004\227\355S1\220\356\021D\005v\2065\270\031i\370\257M\364\016\003\000\331\302c\372\266*\002.U{\343\333\314\251.:\270?4\270\245j\337=\245\213\226\240\021q\371$4G\177b2\271u\007\337\3533\336\242\177BxL\352'\204\310\227\235\205F\302\246!,T\037\274=""\242x\251\324p*\214\241\030\200\336\016uI\304\013\240-\305\326\272w@\310\037\026\313}BsoZ\035\326\321\314k\232\300G\013}`\367\207<^\216MG\315\250\206\025\267l\362\302\252?%\274\224\rx\362\332\tE$\347%\364\377\201\325\n87\n\347\225\252\256\234aE\370\301\010\2425\"\3222\233\207\211\342v6\206\336\226|\\\202r\333b\220\036IT\237\267\006/\202\022\331\032\314rW7\246\205?\026\030T\350\216X\221\214Kr\320\371+\307\223s\0264(\302\325\2641\246\340N\301\341IV/\350Z\t5\204\032";
+    PyObject *data = __Pyx_DecompressString(cstring, 863, 3);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (955 bytes) */
-const char* const cstring = "BZh91AY&SY\374?\032\r\000\000c\177\377\365\361\240\301\303\317\246E\257\363\375\211\377\377\377\377@@@@@@@@@\000@@@\000@\000P\003~\330\335T\212\244\231\204\250(\364\2235\017MFM6I\246\215\r\224\003\312\032i\246M\000h\000\006\232\0314\"\236\250\362\200=@\000h\000\000\000\000\000\00044\000\001)\244\322i\031\017R\236\221\232OI\210\000\000\000h\000\000\000\003C\3248hh\311\243F\215422\030@\031\0002\r4\000\000\310\031\000I!4i4djm\023)\220\014\201\223@\310\000\000\006\203@\3645\003\374\224\303\203xL\276\274\007\017\026\223C\200\332\3337[sz\017!\375\254d\177\206\031\204p\210\t\201\2235\277\232\200\030~\2459\271\n\016\003*(JCy'\352L\214\267\3129\224\243\260\235\310\035\014\332\3241\223 \303B\252<\366\326<\024M\225\001\205[Wq\332\3055n\266\265)C\251Z\3219m\203\023n\313\243\326\007\233\201\340\3206\004P\352$!\023\262\202\264l\226\201f\344\2010I\245kQ\316FB\316\211TOQ\0318\3072i\244\326aMb\204\2735\372\224W0\201\304f\240X\271$\213\251\367\336\002,id\214\357\300\223\305l\023\330\324ha\203?\205\246\314\245\265\n`\250\241\364\330\027D\250\005\204\307\232d\356\223\265\225\201\254\213\305\214LP\207f\277\232JJ\220\240\337(\337\205\366\243\357[\354j_\303\372\3430\035\257\017\002 \014\232H*\026\211\031{\227\325Q%\266\237t\317\004\260o\317\002b\005z\004U\323\232\207gh6&j\232\277\225k\205\203\022\235\242^\241*7\210O\263A6rQ\306\353\305\021L&'0\223\361\304N\005\223\304pm\311\231\023\271g\0234\253\213\267\245\265\260h\336\335\262\354+o{\031\322wI$\224\025D\211/\251\227v\261\202\031\255}\031\207\224_\032\305\014\221\203\033g\005ie\303k\022pP=\327\260\271\211\360\217\037\020\245\202b\266)\030m\027h\305b\347\305qV\2244\006\344\205\016n\020\255\201f\252\341f\302\361jG^\310<\311@\247\310^&H3T\032\364\274\212\256\330\004\362|\330\364\326\236X8\265\331\324\343\3053\214DH\233N\303Fa\214V\013$\333 !\263\014\206\212s\345|\260\270\325C\016\240wP\030\247%\035AB\2060=\222\224\265\031\"`~\3240JQI\212\200\223\035\200\337Q\027XW\013\215\267\230eDX\302\031!\001\000\231\243P\236\312\313-z\032\272p\345/\332H""\250C\205\213\030\207-\232G(\033\006\357HOWl\t\310\325\244\272Y\3311]\246X\006<\225*Q\335\002\220\270x\353\363N\342psfs\346 \344\222u\260\236\014W\r\216s+m`B\270\242\004:-\375\"p\256z0p\021\242\351\342\261\003U\325\254\302SV89r\302\032\354\304\260e'D\310\0310\021SRy!y\"i\262\225~\325\006\260\025!s)\037Q\260\272\350\221\215\021\034`/\205\030\213C_n&\315\316a\254\344\0000T&\027@V\335a\247\2344\004\245\016\347(IX\253\3072\243\361'\213\257\333\260\037t\277z\362g\311E\373\".\240\024\337\331\rr0\374\3009\221\336e\313/X\305=\242V\014$\321\2477\361\027-\306\\\336\212\030H\247W\314 \245\022@\360\022gizY\335\303O\364\226\237\370\273\222)\302\204\207\341\370\320h";
-    PyObject *data = __Pyx_DecompressString(cstring, 955, 2);
+    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (1009 bytes) */
+const char* const cstring = "BZh91AY&SY\263d\367}\000\000k\377\377\365\365\240\341\343\357\346E\257\363\375\211\377\377\377\377@@@@@@@@@\000@@@\000@\000P\003\240\303\311\024$\300J!\020\247\223\325?P\364OB\236\325\007\352\2320Cjz\021\352l\204\032\003!\246\232x\232jyO\t\352\207\000\r\001\240h\000i\246@\001\243L\200\r\0310@b\000\000b\0224\231\030\251\352h\364\302\200\000\032\001\220h\000\000\006\200\r\036\240\034\0004\006\201\240\001\246\231\000\006\2152\0004d\301\001\210\000\001$\211\223!M\246\203I\222dd2\000\0004\000\000\000\000\032\032\004\310\217\014\013\202*_\300d\313\230\307\230\013[\305\305\340\272\346\216\355\204Q&\025\025DEQ{\244U*A3P\201Y\010\240\261\274U9\260\336\335\275\374w\007C\370w|\023\373\036yz]\221\306()5\203\357\321\332\323\321\271W]/Zi\\+\212\005z\032,\331\373\303Bh\233N\006\261\214)\253Q\251\033`\007\350\317\025\276\376:i%\302H6\244\023\\\364\001[\234r%JbG\263\275:\212\r7\334-\207\244\366\354\351\374\237\360\277\366\237`\300$4\032\270>\254\225O;\323\245p\321uu$\256\312C\223q\312C\207\220\217J\334\373+\000R\206\224H\314\370\211pn\202\350j(\276\023\355\251e5kF\0103\233\340\274\001\\= \n\004\203D\223\026vI\215\027\3004\304\203\213\003\332\021\020$\304\331\315\016\346\271\004f6\204\366\243\n\2535\257r\255\366\376\377\241h=>\317\310\210\001\025Q\002\300\177\025\014\235X\026\\\251W&XV\375>\221\253\001\354\314w\031\024\t\253`c\023\231\306Sl\327\016\226\253D\316g\374+\334+L\252M\021>\311%)\220\206\324\210^N9]Y(\246\023\024\227\n\237\324@p\021\206\221\261;q\241*\326P\211{\260\353\177\216J\264jW\235\210S\261\250,\2232I$\240\\\203\202\353\352/\323tU\004\315\263\343\014\361dd\024\213b\254Dj\202\246(\335\005\240T\301!\356\256\3471M\303\307\304*`\201k\025\0146\345\373\230\260\256\014Q\371\265*7\005\312\230\250\337\334\026\260-\026^-\027<\014\221\326\303C\314\322\0259\212\310$\032,\026\265O\"\255\307@S7\303.\355\251\346\0218X\335\250\251\036\004\034b\"D\3378\203\030\3018h\n\331\033A@\343\005\003\024\367\036\307\300\304\\\211\014\2403\030\030\2534\270\302\242L`Od\247<\214\221\001?\217F\t\316(""\210\303\213\001M\216p\257\223\025\3040\326\341k\343\001\251b(a3\014\005\002d\250\310Cz\327?E&}\333\264\315,\204\313\004\234\006,\202NF\325C\225\006\311\313\342\t\352\375\2210\344g\250\276z\214\230\267\031\247@e\315Z\251\030\215\260+\025\345\003\260FN$\003,\254\362\200\223$\223-\t\240b\260\033e!|\357\200\202\254R\200A\220\237\345\tB\255\251 \357\020\317\\\260\320\20072\231%)*\030\006\025\254\000e(|\356!K&\006L\004T\025Gj\212\322!\014\352\317\332\221\252\005\210[\025\t\366\033(\346\"fTDq\200\322\tb1\213{\310\211\265{\230l;\301\003\001HE\005\024\330\023V\244&n\3718\t\3545$`\246\301.\034\276%\322\261iy9\357\340\374!$I\223\026%\215\344\306]\023\313\314\003\177\306\345\263|2\353\021ug&\213\244\252\371\006\\|\\Y\373\325\212<\231\364$e\rn9\216]/a\313v\335\233%\270\345\254_\225\315`\300W\003Q\210\336\204c\030\023v\215\227\376.\344\212p\241!f\311\356\372";
+    PyObject *data = __Pyx_DecompressString(cstring, 1009, 2);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (799 bytes) */
-const char* const cstring = "x\332\205T1o\0249\024\316\256\020\t\024DT\\\225s\003A:\262\010\t$\212\323\235\" \341N\"\267\033NG\201\304\303\353y\273\353\213\307\236\330\236%s\300)e\312\224\224)\267L\2312?\301\345\226\371\t\371\t<\317LB\310\016\260\205\375\374\346{\237\277\367\374\336\376\276a<2?\342\236=)\374\310h&\035KP\311>Z\356Q\025\314y+\205G\033A\232u\237uW\036>~\310\270N\230\305\177Qx\307\\\336\027\212;\207\216\231\001\353\347Ry\251\231/2t\035\366\307\200\025&g\0321a\336\260\214p\027\003\374\0105s\350\243\301\226\271\326\306s/\215\006\n\227z\270\314\022i\351\0229\306\030\275\306\225\303\016O\022 \034&\322\361\276B\324q\035\n\351*+I\223\014\2622\231\373/\236\"\371\211\257k\215@\347:Y\261\243\r%8\340\271\362\014\300b\222\013\004`I^\336\240\215^\241\204\307\222+\372*\244\226\036\340\327X\003=t&\267\002\177\353\026\253C\324\376\231\036KktJ\346\254\247s\316,J!\000\215\030J\334Q\276\337E\361,S\005\010\256D\256\"\324\242\317\255\356\026O\013\315S)(\261\241\345iJ\372\232|MB\032Q\rR\032p\225\230\314()\n\3001W?FI\037;)>\301\267\241D\224\343E\344?\321\261\226k\021\217\356\362\271)\251\031DCB\2270\274\334\353\313\007\265{\026U*\354\243R)\327\200\333y\325\237D\267\023kD\263\001\033\270\3437\251\245\312\210F\326\312\351\232\271\232_x\246\324\315Um, w\205\026\322t\204\261&\247aD'\240\226 @\344\326Rc\225i\322\261&\314\320BY/Q\337O\237\312\263\023\212\010@\322HZ.\260\317\305\326W\0144\205\302\344\332oF\351e\302@\277\341Y\365\001\244\203s\035\2440u\000)':\3702\247\235\313sJ\037M\222\253\030\016\3243\264_\226\231\231\214\234\364\006\3655TKU!\277\014\365L\233\234;p\007\316\322\264\370\216\333d\263<Tv\225\027\252A\331D\365\375d\325\377\032\027Z\013\032\332\254*Z\271\000D\213\326\221E72*)\237\311\355\256N\347W&\275\351\374\362\301v\275\3349\340\323\371\033{\311\376\355p\353\336du\362\352p\343x%\374\3656\274\335\n[\3430~G1\013\235\t\237.\334\235\264\246\0131\246\262\036\034\336<\275:w\375\347O\311\301\235p\367\361Q\353h\351\370c\370\033\002d!{\177:7\367\241\265\336\246m\275\335\213[\257\275\331>YX\014\213\354""\240\265\273z\322@yrm\351\307\\\317#\311\336v\263\250s=\223\305\303\355\243\033\307ix\371&\2741\301\374G\261\357[k\221b\255\275\376M\212\305=\277\377(\374T\225\341\371\321F\370\363ux=\010\203a\304\226\260\032A\366d\351\360\377\343\336nkz\345\372\336/\373\275\317\247U\265\207";
-    PyObject *data = __Pyx_DecompressString(cstring, 799, 1);
+    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (846 bytes) */
+const char* const cstring = "x\332\215T\317o\033E\024\216-DB\205\032\365\004\\\312p\240\t\202\030*\025\251\207\252(\242I\n\022\301\t\010\016\225\362:\236}\266\207\214g63\263n\226\002\312\321\307\0349\372\350\243\217>\346O\230\243\217\371\023\372'\360fw\223\206x\323\326\207\3317o\276\367\315\367~x\276\3335\036\231\357s\317\276\317}\337h&\035KP\311\016Z\356Q\345\314y+\205G\033A\232\265\267\332\033\017\036>`\\'\314\342\037(\274c.\353\010\305\235C\307L\227u2\251\274\324\314\347)\272\026\373\241\313r\2231\215\2300oXJ\270\253\001\276\217\2329\364\321`k\\k\343\271\227F\003\205K\335[c\211\264t\211\034b\214\336\346\312a\213'\t\020\016\023\351xG!\352\270\366\204t\245\225\014\222\024\322\"\231\257\177z\202\344'\276\2665\002\235k\245\371\2616\224`\227g\3123\000\213I&\020\200%Yq\2036z\203\022\036J\256\350TH-=\300\243X\003\335s&\263\002\037\267\363\315\036j\277\245\207\322\032= s\321\323\272d\026\205\020\200Z\014%\356(\3377\242x\232\252\034\004W\"S\021j\321gV\277\00305J\212\034Rk:\357\200\366\226k\007\335L\213v\376$\327| \005\325\254g\371`@\251\327\371\352r\254E\325dY\203+\005U\242q\310\325\333Q\322\307!\215\335\275\031JD\031^E\376\026\035\333\224g\334\272\353\373\272\244\026\0205\t]\303\360\342[]\336\255\334\213\250Ba\007\225\032p\rx\224\225\243Ot\307\261F\364\267\203]<\366\3734\255ED-k\351t\365\\o\230\211\372\271\272y,\026\372S\337\212\332\252s\227k!MK\030k2z\034\320\t\250t\013\020\231\2654\221Emh{!\021-\024E\026\2252:*\366N(\"\000\251\2436\201\035.\016\377\307@\257\2020\231\366\373Q~\241\034\350\327\273h\031\200tp\251\203\024\016\034\300\200\023\035\274~7Z\327\337\r:4I\246b8\320\240\321\367\272\314\324\244\344\244\306U\327P\003T\211|\375\310,\314\326\245\003\217\341\"M\213/\270M\366\213Mi\227y\241\352\026\223W\335OV\365\212]\231G\250\231\315\262h\305\002\020-Z\373\026]\337\250\244h\223;\331\234\257\254O\032\363\225\017G[\341\316\2751\037\3773=8\273O\356\345\215\311\336|ym|T-t6_\276=JN?\017\037}5\331\234\374>\335=\333\010\077\077\017\317\017\303\3410\014_D\252\326\204W|1\246\264\356O\357\274z\177\351\326""\247\377&\343{a\375\341\2541\273{\366w\370\025\002\244!}\371ji\351\257\306N\223>;\315\275\370\331k\3567\317WV\303*\0337N6\317k(\317?\270\373v\256\247\221dtT/\352R\317duz4\273}6\010\277\034\204\003\023\314\237\024\373\262\261\035)\266\233;7R\254\216\374\351\267\341\343\262\014Og\273\341\307g\341Y7t{\021[\035~3mL?\231}Q\324\362\302G\245\230\256\317>;i\314\337\2735\372\362t\357?4l\376\260";
+    PyObject *data = __Pyx_DecompressString(cstring, 846, 1);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #else /* compression: none (1742 bytes) */
-const char* const bytes = "?Note that Cython is deliberately stricter than PEP-484 and rejects subclasses of builtin types. If you need to pass subclasses then set the 'annotation_typing' directive to False.add_notedisableenablegcisenabledmdp_python/MDecisionProcess.pyxno default __reduce__ due to non-trivial __cinit__<stringsource>PyAgentEnvironmentPyAgentEnvironment.__reduce_cython__PyAgentEnvironment.__setstate_cython__PyAgentEnvironment.apply_calculate_returnPyDynamicProgrammingPyDynamicProgramming.__reduce_cython__PyDynamicProgramming.__setstate_cython__PyDynamicProgramming.apply_policy_evalPyDynamicProgramming.apply_policy_iterationPyDynamicProgramming.apply_value_iterationPyValueFunctionsPyValueFunctions.__reduce_cython__PyValueFunctions.__setstate_cython__PyValueFunctions.action_value_functionPyValueFunctions.apply_bellman_equation__Pyx_PyDict_NextRefactionaction_value_functionactionsapply_bellman_equationapply_calculate_returnapply_policy_evalapply_policy_iterationapply_value_iterationasyncio.coroutinesc_actionsc_currentValuesc_policy_per_statec_returnsc_statescline_in_tracebackcurrentValuesdiscountRate__func____getstate___is_coroutineitems__main__mdp_python.MDecisionProcess__module____name__policy_per_statepop__pyx_state__qualname____reduce____reduce_cython____reduce_ex__returnsrewardReturnrewardValueself__set_name__setdefault__setstate____setstate_cython__statestates__test__thresholdvalues\200A\330\007-\250Q\330\007'\240q\330\007'\240q\330\007&\240a\330\007\016\210d\220%\320\027,\250A\250W\260N\300-\320O`\320`k\320kv\320vw\200A\330\010.\250a\330\010(\250\001\330\010'\240q\330\010(\250\001\330\0101\260\021\360\006\000\n\037\230d\240&\320(8\270\001\270\036\300}\320T_\320_p\320p{\360\000\000|\001G\002\360\000\000G\002Q\002\360\000\000Q\002R\002\340\010\017\320\017 \240\001\200A\340\010.\250a\330\010(\250\001\330\010'\240q\330\010(\250\001\340\t\036\230d\240&\320(8\270\001\270\036\300}\320T_\320_p\320p{\360\000\000|\001G\002\360\000\000G\002H\002\340\010\017\210q\200A\330\010.\250a""\330\010(\250\001\330\010'\240q\330\010(\250\001\360\006\000\n\037\230d\240&\250\017\260q\270\016\300m\320S^\320^o\320oz\360\000\000{\001F\002\360\000\000F\002G\002\340\010\017\210q\200A\330\010.\250a\330\010(\250\001\330\010'\240q\330\010\017\210t\2205\320\030,\250A\250W\260H\270N\320J[\320[f\320fg\200A\330\010(\250\001\330\010\017\210t\2205\320\030(\250\001\250\036\260~\300Q\200\001\330\004\n\210+\220Q";
+    #else /* compression: none (1922 bytes) */
+const char* const bytes = "?Note that Cython is deliberately stricter than PEP-484 and rejects subclasses of builtin types. If you need to pass subclasses then set the 'annotation_typing' directive to False.add_notedisableenablegcisenabledmdp_python/MDecisionProcess.pyxno default __reduce__ due to non-trivial __cinit__<stringsource>PyAgentEnvironmentPyAgentEnvironment.__reduce_cython__PyAgentEnvironment.__setstate_cython__PyAgentEnvironment.apply_calculate_returnPyAgentEnvironment.apply_calculate_policy_probPyAgentEnvironment.apply_calculate_trans_funcPyDynamicProgrammingPyDynamicProgramming.__reduce_cython__PyDynamicProgramming.__setstate_cython__PyDynamicProgramming.apply_policy_evalPyDynamicProgramming.apply_policy_iterationPyDynamicProgramming.apply_value_iterationPyValueFunctionsPyValueFunctions.__reduce_cython__PyValueFunctions.__setstate_cython__PyValueFunctions.action_value_functionPyValueFunctions.apply_bellman_equation__Pyx_PyDict_NextRefactionaction_value_functionactionsapply_bellman_equationapply_calculate_policy_probapply_calculate_returnapply_calculate_trans_funcapply_policy_evalapply_policy_iterationapply_value_iterationasyncio.coroutinesc_actionsc_currentValuesc_policy_per_statec_returnsc_statescline_in_tracebackcurrentValuesdiscountRate__func____getstate___is_coroutineitems__main__mdp_python.MDecisionProcess__module____name__policy_per_statepop__pyx_state__qualname____reduce____reduce_cython____reduce_ex__returnsrewardReturnrewardValueself__set_name__setdefault__setstate____setstate_cython__statestates__test__thresholdvalues\200A\330\010(\250\001\330\010\014\210E\320\021&\240a\240~\260^\3001\200A\330\007-\250Q\330\007'\240q\330\007'\240q\330\007&\240a\330\007\016\210d\220%\320\027,\250A\250W\260N\300-\320O`\320`k\320kv\320vw\200A\330\010.\250a\330\010(\250\001\330\010'\240q\330\010(\250\001\330\0101\260\021\360\006\000\n\037\230d\240&\320(8\270\001\270\036\300}\320T_\320_p\320p{\360\000\000|\001G\002\360\000\000G\002Q\002\360\000\000Q\002R\002\340\010\017\320\017 \240\001""\200A\340\010.\250a\330\010(\250\001\330\010'\240q\330\010(\250\001\340\t\036\230d\240&\320(8\270\001\270\036\300}\320T_\320_p\320p{\360\000\000|\001G\002\360\000\000G\002H\002\340\010\017\210q\200A\330\010.\250a\330\010(\250\001\330\010'\240q\330\010(\250\001\360\006\000\n\037\230d\240&\250\017\260q\270\016\300m\320S^\320^o\320oz\360\000\000{\001F\002\360\000\000F\002G\002\340\010\017\210q\200A\330\010.\250a\330\010(\250\001\330\010'\240q\330\010\017\210t\2205\320\030,\250A\250W\260H\270N\320J[\320[f\320fg\200A\330\010\017\210t\2205\320\0300\260\001\260\031\270)\3001\200A\330\010\017\210t\2205\320\0301\260\021\260(\270!\200\001\330\004\n\210+\220Q";
     PyObject *data = NULL;
     CYTHON_UNUSED_VAR(__Pyx_DecompressString);
     #endif
     PyObject **stringtab = __pyx_mstate->__pyx_string_tab;
     Py_ssize_t pos = 0;
-    for (int i = 0; i < 71; i++) {
+    for (int i = 0; i < 75; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyUnicode_DecodeUTF8(bytes + pos, bytes_length, NULL);
       if (likely(string) && i >= 10) PyUnicode_InternInPlace(&string);
@@ -7876,7 +8351,7 @@ const char* const bytes = "?Note that Cython is deliberately stricter than PEP-4
       stringtab[i] = string;
       pos += bytes_length;
     }
-    for (int i = 71; i < 78; i++) {
+    for (int i = 75; i < 84; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyBytes_FromStringAndSize(bytes + pos, bytes_length);
       stringtab[i] = string;
@@ -7887,15 +8362,15 @@ const char* const bytes = "?Note that Cython is deliberately stricter than PEP-4
       }
     }
     Py_XDECREF(data);
-    for (Py_ssize_t i = 0; i < 78; i++) {
+    for (Py_ssize_t i = 0; i < 84; i++) {
       if (unlikely(PyObject_Hash(stringtab[i]) == -1)) {
         __PYX_ERR(0, 1, __pyx_L1_error)
       }
     }
     #if CYTHON_IMMORTAL_CONSTANTS
     {
-      PyObject **table = stringtab + 71;
-      for (Py_ssize_t i=0; i<7; ++i) {
+      PyObject **table = stringtab + 75;
+      for (Py_ssize_t i=0; i<9; ++i) {
         #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
         #if PY_VERSION_HEX < 0x030E0000
         if (_Py_IsOwnedByCurrentThread(table[i]) && Py_REFCNT(table[i]) == 1)
@@ -7942,62 +8417,72 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 5, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 63};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_discountRate, __pyx_mstate->__pyx_n_u_rewardReturn, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_c_returns};
-    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_calculate_return, __pyx_mstate->__pyx_kp_b_iso88591_A_t5_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_calculate_return, __pyx_mstate->__pyx_kp_b_iso88591_A_E_a_1, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
+  }
+  {
+    const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 3, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 67};
+    PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_action, __pyx_mstate->__pyx_n_u_state};
+    __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_calculate_policy_prob, __pyx_mstate->__pyx_kp_b_iso88591_A_t5_1, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
+  }
+  {
+    const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 4, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 70};
+    PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_actions, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_states};
+    __pyx_mstate_global->__pyx_codeobj_tab[2] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_calculate_trans_func, __pyx_mstate->__pyx_kp_b_iso88591_A_t5_0_1, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[2])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 1};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[3] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[3])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 3};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_pyx_state};
-    __pyx_mstate_global->__pyx_codeobj_tab[2] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[2])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[4] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[4])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {7, 0, 0, 10, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 95};
+    const __Pyx_PyCode_New_function_description descr = {7, 0, 0, 10, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 102};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_state, __pyx_mstate->__pyx_n_u_action, __pyx_mstate->__pyx_n_u_discountRate, __pyx_mstate->__pyx_n_u_currentValues, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_states, __pyx_mstate->__pyx_n_u_c_currentValues, __pyx_mstate->__pyx_n_u_c_returns, __pyx_mstate->__pyx_n_u_c_states};
-    __pyx_mstate_global->__pyx_codeobj_tab[3] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_action_value_function, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_t5_AWHNJ_ffg, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[3])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[5] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_action_value_function, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_t5_AWHNJ_ffg, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[5])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {8, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 101};
+    const __Pyx_PyCode_New_function_description descr = {8, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 108};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_state, __pyx_mstate->__pyx_n_u_discountRate, __pyx_mstate->__pyx_n_u_rewardValue, __pyx_mstate->__pyx_n_u_currentValues, __pyx_mstate->__pyx_n_u_actions, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_states, __pyx_mstate->__pyx_n_u_c_currentValues, __pyx_mstate->__pyx_n_u_c_actions, __pyx_mstate->__pyx_n_u_c_returns, __pyx_mstate->__pyx_n_u_c_states};
-    __pyx_mstate_global->__pyx_codeobj_tab[4] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_bellman_equation, __pyx_mstate->__pyx_kp_b_iso88591_A_Q_q_q_a_d_AWN_O_kkvvw, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[4])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[6] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_bellman_equation, __pyx_mstate->__pyx_kp_b_iso88591_A_Q_q_q_a_d_AWN_O_kkvvw, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[6])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 1};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[5] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[5])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[7] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[7])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 3};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_pyx_state};
-    __pyx_mstate_global->__pyx_codeobj_tab[6] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[6])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[8] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[8])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {8, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 125};
+    const __Pyx_PyCode_New_function_description descr = {8, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 140};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_discountRate, __pyx_mstate->__pyx_n_u_rewardValue, __pyx_mstate->__pyx_n_u_threshold, __pyx_mstate->__pyx_n_u_currentValues, __pyx_mstate->__pyx_n_u_actions, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_states, __pyx_mstate->__pyx_n_u_c_currentValues, __pyx_mstate->__pyx_n_u_c_returns, __pyx_mstate->__pyx_n_u_c_states, __pyx_mstate->__pyx_n_u_c_actions};
-    __pyx_mstate_global->__pyx_codeobj_tab[7] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_policy_eval, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_d_8_T__pp_G_G_H_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[7])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[9] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_policy_eval, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_d_8_T__pp_G_G_H_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[9])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {9, 0, 0, 14, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 136};
+    const __Pyx_PyCode_New_function_description descr = {9, 0, 0, 14, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 151};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_discountRate, __pyx_mstate->__pyx_n_u_rewardValue, __pyx_mstate->__pyx_n_u_threshold, __pyx_mstate->__pyx_n_u_currentValues, __pyx_mstate->__pyx_n_u_actions, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_states, __pyx_mstate->__pyx_n_u_policy_per_state, __pyx_mstate->__pyx_n_u_c_currentValues, __pyx_mstate->__pyx_n_u_c_returns, __pyx_mstate->__pyx_n_u_c_states, __pyx_mstate->__pyx_n_u_c_actions, __pyx_mstate->__pyx_n_u_c_policy_per_state};
-    __pyx_mstate_global->__pyx_codeobj_tab[8] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_policy_iteration, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_1_d_8_T__pp_G_G_Q_Q_R, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[8])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[10] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_policy_iteration, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_1_d_8_T__pp_G_G_Q_Q_R, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[10])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {8, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 148};
+    const __Pyx_PyCode_New_function_description descr = {8, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 163};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_discountRate, __pyx_mstate->__pyx_n_u_rewardValue, __pyx_mstate->__pyx_n_u_threshold, __pyx_mstate->__pyx_n_u_currentValues, __pyx_mstate->__pyx_n_u_actions, __pyx_mstate->__pyx_n_u_returns, __pyx_mstate->__pyx_n_u_states, __pyx_mstate->__pyx_n_u_c_currentValues, __pyx_mstate->__pyx_n_u_c_returns, __pyx_mstate->__pyx_n_u_c_states, __pyx_mstate->__pyx_n_u_c_actions};
-    __pyx_mstate_global->__pyx_codeobj_tab[9] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_value_iteration, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_d_q_mS_ooz_F_F_G_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[9])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[11] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_mdp_python_MDecisionProcess_pyx, __pyx_mstate->__pyx_n_u_apply_value_iteration, __pyx_mstate->__pyx_kp_b_iso88591_A_a_q_d_q_mS_ooz_F_F_G_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[11])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 1};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[10] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[10])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[12] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[12])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 3};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_pyx_state};
-    __pyx_mstate_global->__pyx_codeobj_tab[11] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[11])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[13] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_stringsource, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[13])) goto bad;
   }
   Py_DECREF(tuple_dedup_map);
   return 0;
@@ -8315,30 +8800,95 @@ bad:
 #endif
 #endif
 
-/* RaiseArgTupleInvalid */
-static void __Pyx_RaiseArgtupleInvalid(
-    const char* func_name,
-    int exact,
-    Py_ssize_t num_min,
-    Py_ssize_t num_max,
-    Py_ssize_t num_found)
+/* KeywordStringCheck */
+static int __Pyx_CheckKeywordStrings(
+    const char* function_name,
+    PyObject *kw)
 {
-    Py_ssize_t num_expected;
-    const char *more_or_less;
-    if (num_found < num_min) {
-        num_expected = num_min;
-        more_or_less = "at least";
+#if CYTHON_COMPILING_IN_PYPY && !defined(PyArg_ValidateKeywordArguments)
+    CYTHON_UNUSED_VAR(function_name);
+    CYTHON_UNUSED_VAR(kw);
+    return 0;
+#else
+    if (CYTHON_METH_FASTCALL && likely(PyTuple_Check(kw))) {
+#if PY_VERSION_HEX >= 0x03090000
+        CYTHON_UNUSED_VAR(function_name);
+#else
+        Py_ssize_t kwsize;
+        #if CYTHON_ASSUME_SAFE_SIZE
+        kwsize = PyTuple_GET_SIZE(kw);
+        #else
+        kwsize = PyTuple_Size(kw);
+        if (unlikely(kwsize < 0)) return -1;
+        #endif
+        for (Py_ssize_t pos = 0; pos < kwsize; pos++) {
+            PyObject* key = NULL;
+            #if CYTHON_ASSUME_SAFE_MACROS
+            key = PyTuple_GET_ITEM(kw, pos);
+            #else
+            key = PyTuple_GetItem(kw, pos);
+            if (unlikely(!key)) return -1;
+            #endif
+            if (unlikely(!PyUnicode_Check(key))) {
+                PyErr_Format(PyExc_TypeError,
+                    "%.200s() keywords must be strings", function_name);
+                return -1;
+            }
+        }
+#endif
     } else {
-        num_expected = num_max;
-        more_or_less = "at most";
+        if (unlikely(!PyArg_ValidateKeywordArguments(kw))) return -1;
     }
-    if (exact) {
-        more_or_less = "exactly";
+    return 0;
+#endif
+}
+
+/* ArgTypeTestFunc (used by ArgTypeTest) */
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact)
+{
+    __Pyx_TypeName type_name;
+    __Pyx_TypeName obj_type_name;
+    PyObject *extra_info = __pyx_mstate_global->__pyx_empty_unicode;
+    int from_annotation_subclass = 0;
+    if (unlikely(!type)) {
+        PyErr_SetString(PyExc_SystemError, "Missing type object");
+        return 0;
     }
+    else if (!exact) {
+        if (likely(__Pyx_TypeCheck(obj, type))) return 1;
+    } else if (exact == 2) {
+        if (__Pyx_TypeCheck(obj, type)) {
+            from_annotation_subclass = 1;
+            extra_info = __pyx_mstate_global->__pyx_kp_u_Note_that_Cython_is_deliberately;
+        }
+    }
+    type_name = __Pyx_PyType_GetFullyQualifiedName(type);
+    obj_type_name = __Pyx_PyType_GetFullyQualifiedName(Py_TYPE(obj));
     PyErr_Format(PyExc_TypeError,
-                 "%.200s() takes %.8s %" CYTHON_FORMAT_SSIZE_T "d positional argument%.1s (%" CYTHON_FORMAT_SSIZE_T "d given)",
-                 func_name, more_or_less, num_expected,
-                 (num_expected == 1) ? "" : "s", num_found);
+        "Argument '%.200s' has incorrect type (expected " __Pyx_FMT_TYPENAME
+        ", got " __Pyx_FMT_TYPENAME ")"
+#if __PYX_LIMITED_VERSION_HEX < 0x030C0000
+        "%s%U"
+#endif
+        , name, type_name, obj_type_name
+#if __PYX_LIMITED_VERSION_HEX < 0x030C0000
+        , (from_annotation_subclass ? ". " : ""), extra_info
+#endif
+        );
+#if __PYX_LIMITED_VERSION_HEX >= 0x030C0000
+    if (exact == 2 && from_annotation_subclass) {
+        PyObject *res;
+        PyObject *vargs[2];
+        vargs[0] = PyErr_GetRaisedException();
+        vargs[1] = extra_info;
+        res = PyObject_VectorcallMethod(__pyx_mstate_global->__pyx_kp_u_add_note, vargs, 2, NULL);
+        Py_XDECREF(res);
+        PyErr_SetRaisedException(vargs[0]);
+    }
+#endif
+    __Pyx_DECREF_TypeName(type_name);
+    __Pyx_DECREF_TypeName(obj_type_name);
+    return 0;
 }
 
 /* PyObjectCall (used by PyObjectFastCall) */
@@ -8610,7 +9160,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyDict_Values(PyObject* d) {
     return __Pyx_CallUnboundCMethod0(&__pyx_mstate_global->__pyx_umethod_PyDict_Type_values, d);
 }
 
-/* OwnedDictNext (used by RejectKeywords) */
+/* OwnedDictNext (used by ParseKeywordsImpl) */
 #if CYTHON_AVOID_BORROWED_REFS
 static int __Pyx_PyDict_NextRef(PyObject *p, PyObject **ppos, PyObject **pkey, PyObject **pvalue) {
     PyObject *next = NULL;
@@ -8664,81 +9214,6 @@ static int __Pyx_PyDict_NextRef(PyObject *p, Py_ssize_t *ppos, PyObject **pkey, 
     return result;
 }
 #endif
-
-/* RejectKeywords */
-static void __Pyx_RejectKeywords(const char* function_name, PyObject *kwds) {
-    PyObject *key = NULL;
-    if (CYTHON_METH_FASTCALL && likely(PyTuple_Check(kwds))) {
-        key = __Pyx_PySequence_ITEM(kwds, 0);
-    } else {
-#if CYTHON_AVOID_BORROWED_REFS
-        PyObject *pos = NULL;
-#else
-        Py_ssize_t pos = 0;
-#endif
-#if !CYTHON_COMPILING_IN_PYPY || defined(PyArg_ValidateKeywordArguments)
-        if (unlikely(!PyArg_ValidateKeywordArguments(kwds))) return;
-#endif
-        __Pyx_PyDict_NextRef(kwds, &pos, &key, NULL);
-#if CYTHON_AVOID_BORROWED_REFS
-        Py_XDECREF(pos);
-#endif
-    }
-    if (likely(key)) {
-        PyErr_Format(PyExc_TypeError,
-            "%s() got an unexpected keyword argument '%U'",
-            function_name, key);
-        Py_DECREF(key);
-    }
-}
-
-/* ArgTypeTestFunc (used by ArgTypeTest) */
-static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact)
-{
-    __Pyx_TypeName type_name;
-    __Pyx_TypeName obj_type_name;
-    PyObject *extra_info = __pyx_mstate_global->__pyx_empty_unicode;
-    int from_annotation_subclass = 0;
-    if (unlikely(!type)) {
-        PyErr_SetString(PyExc_SystemError, "Missing type object");
-        return 0;
-    }
-    else if (!exact) {
-        if (likely(__Pyx_TypeCheck(obj, type))) return 1;
-    } else if (exact == 2) {
-        if (__Pyx_TypeCheck(obj, type)) {
-            from_annotation_subclass = 1;
-            extra_info = __pyx_mstate_global->__pyx_kp_u_Note_that_Cython_is_deliberately;
-        }
-    }
-    type_name = __Pyx_PyType_GetFullyQualifiedName(type);
-    obj_type_name = __Pyx_PyType_GetFullyQualifiedName(Py_TYPE(obj));
-    PyErr_Format(PyExc_TypeError,
-        "Argument '%.200s' has incorrect type (expected " __Pyx_FMT_TYPENAME
-        ", got " __Pyx_FMT_TYPENAME ")"
-#if __PYX_LIMITED_VERSION_HEX < 0x030C0000
-        "%s%U"
-#endif
-        , name, type_name, obj_type_name
-#if __PYX_LIMITED_VERSION_HEX < 0x030C0000
-        , (from_annotation_subclass ? ". " : ""), extra_info
-#endif
-        );
-#if __PYX_LIMITED_VERSION_HEX >= 0x030C0000
-    if (exact == 2 && from_annotation_subclass) {
-        PyObject *res;
-        PyObject *vargs[2];
-        vargs[0] = PyErr_GetRaisedException();
-        vargs[1] = extra_info;
-        res = PyObject_VectorcallMethod(__pyx_mstate_global->__pyx_kp_u_add_note, vargs, 2, NULL);
-        Py_XDECREF(res);
-        PyErr_SetRaisedException(vargs[0]);
-    }
-#endif
-    __Pyx_DECREF_TypeName(type_name);
-    __Pyx_DECREF_TypeName(obj_type_name);
-    return 0;
-}
 
 /* RaiseDoubleKeywords (used by ParseKeywordsImpl) */
 static void __Pyx_RaiseDoubleKeywordsError(
@@ -9190,6 +9665,59 @@ static int __Pyx_ParseKeywords(
         return __Pyx_ParseKeywordDict(kwds, argnames, values, num_pos_args, num_kwargs, function_name, ignore_unknown_kwargs);
 }
 
+/* RaiseArgTupleInvalid */
+static void __Pyx_RaiseArgtupleInvalid(
+    const char* func_name,
+    int exact,
+    Py_ssize_t num_min,
+    Py_ssize_t num_max,
+    Py_ssize_t num_found)
+{
+    Py_ssize_t num_expected;
+    const char *more_or_less;
+    if (num_found < num_min) {
+        num_expected = num_min;
+        more_or_less = "at least";
+    } else {
+        num_expected = num_max;
+        more_or_less = "at most";
+    }
+    if (exact) {
+        more_or_less = "exactly";
+    }
+    PyErr_Format(PyExc_TypeError,
+                 "%.200s() takes %.8s %" CYTHON_FORMAT_SSIZE_T "d positional argument%.1s (%" CYTHON_FORMAT_SSIZE_T "d given)",
+                 func_name, more_or_less, num_expected,
+                 (num_expected == 1) ? "" : "s", num_found);
+}
+
+/* RejectKeywords */
+static void __Pyx_RejectKeywords(const char* function_name, PyObject *kwds) {
+    PyObject *key = NULL;
+    if (CYTHON_METH_FASTCALL && likely(PyTuple_Check(kwds))) {
+        key = __Pyx_PySequence_ITEM(kwds, 0);
+    } else {
+#if CYTHON_AVOID_BORROWED_REFS
+        PyObject *pos = NULL;
+#else
+        Py_ssize_t pos = 0;
+#endif
+#if !CYTHON_COMPILING_IN_PYPY || defined(PyArg_ValidateKeywordArguments)
+        if (unlikely(!PyArg_ValidateKeywordArguments(kwds))) return;
+#endif
+        __Pyx_PyDict_NextRef(kwds, &pos, &key, NULL);
+#if CYTHON_AVOID_BORROWED_REFS
+        Py_XDECREF(pos);
+#endif
+    }
+    if (likely(key)) {
+        PyErr_Format(PyExc_TypeError,
+            "%s() got an unexpected keyword argument '%U'",
+            function_name, key);
+        Py_DECREF(key);
+    }
+}
+
 /* PyErrFetchRestore (used by RaiseException) */
 #if CYTHON_FAST_THREAD_STATE
 static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
@@ -9355,6 +9883,109 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject 
 bad:
     Py_XDECREF(owned_instance);
     return;
+}
+
+/* GetItemInt */
+static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
+    PyObject *r;
+    if (unlikely(!j)) return NULL;
+    r = PyObject_GetItem(o, j);
+    Py_DECREF(j);
+    return r;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck, int unsafe_shared) {
+    CYTHON_MAYBE_UNUSED_VAR(unsafe_shared);
+#if CYTHON_ASSUME_SAFE_SIZE
+    Py_ssize_t wrapped_i = i;
+    if (wraparound & unlikely(i < 0)) {
+        wrapped_i += PyList_GET_SIZE(o);
+    }
+    if ((CYTHON_AVOID_BORROWED_REFS || CYTHON_AVOID_THREAD_UNSAFE_BORROWED_REFS || !CYTHON_ASSUME_SAFE_MACROS)) {
+        return __Pyx_PyList_GetItemRefFast(o, wrapped_i, unsafe_shared);
+    } else
+    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyList_GET_SIZE(o)))) {
+        return __Pyx_NewRef(PyList_GET_ITEM(o, wrapped_i));
+    }
+    return __Pyx_GetItemInt_Generic(o, PyLong_FromSsize_t(i));
+#else
+    (void)wraparound;
+    (void)boundscheck;
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck, int unsafe_shared) {
+    CYTHON_MAYBE_UNUSED_VAR(unsafe_shared);
+#if CYTHON_ASSUME_SAFE_SIZE && CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    Py_ssize_t wrapped_i = i;
+    if (wraparound & unlikely(i < 0)) {
+        wrapped_i += PyTuple_GET_SIZE(o);
+    }
+    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyTuple_GET_SIZE(o)))) {
+        return __Pyx_NewRef(PyTuple_GET_ITEM(o, wrapped_i));
+    }
+    return __Pyx_GetItemInt_Generic(o, PyLong_FromSsize_t(i));
+#else
+    (void)wraparound;
+    (void)boundscheck;
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
+                                                     int wraparound, int boundscheck, int unsafe_shared) {
+    CYTHON_MAYBE_UNUSED_VAR(unsafe_shared);
+#if CYTHON_ASSUME_SAFE_MACROS && CYTHON_ASSUME_SAFE_SIZE
+    if (is_list || PyList_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
+        if ((CYTHON_AVOID_BORROWED_REFS || CYTHON_AVOID_THREAD_UNSAFE_BORROWED_REFS)) {
+            return __Pyx_PyList_GetItemRefFast(o, n, unsafe_shared);
+        } else if ((!boundscheck) || (likely(__Pyx_is_valid_index(n, PyList_GET_SIZE(o))))) {
+            return __Pyx_NewRef(PyList_GET_ITEM(o, n));
+        }
+    } else
+    #if !CYTHON_AVOID_BORROWED_REFS
+    if (PyTuple_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
+        if ((!boundscheck) || likely(__Pyx_is_valid_index(n, PyTuple_GET_SIZE(o)))) {
+            return __Pyx_NewRef(PyTuple_GET_ITEM(o, n));
+        }
+    } else
+    #endif
+#endif
+#if CYTHON_USE_TYPE_SLOTS && !CYTHON_COMPILING_IN_PYPY
+    {
+        PyMappingMethods *mm = Py_TYPE(o)->tp_as_mapping;
+        PySequenceMethods *sm = Py_TYPE(o)->tp_as_sequence;
+        if (!is_list && mm && mm->mp_subscript) {
+            PyObject *r, *key = PyLong_FromSsize_t(i);
+            if (unlikely(!key)) return NULL;
+            r = mm->mp_subscript(o, key);
+            Py_DECREF(key);
+            return r;
+        }
+        if (is_list || likely(sm && sm->sq_item)) {
+            if (wraparound && unlikely(i < 0) && likely(sm->sq_length)) {
+                Py_ssize_t l = sm->sq_length(o);
+                if (likely(l >= 0)) {
+                    i += l;
+                } else {
+                    if (!PyErr_ExceptionMatches(PyExc_OverflowError))
+                        return NULL;
+                    PyErr_Clear();
+                }
+            }
+            return sm->sq_item(o, i);
+        }
+    }
+#else
+    if (is_list || !PyMapping_Check(o)) {
+        return PySequence_GetItem(o, i);
+    }
+#endif
+    (void)wraparound;
+    (void)boundscheck;
+    return __Pyx_GetItemInt_Generic(o, PyLong_FromSsize_t(i));
 }
 
 /* AllocateExtensionType */
@@ -11723,45 +12354,6 @@ bad:
 }
 #endif
 
-/* FormatTypeName */
-#if CYTHON_COMPILING_IN_LIMITED_API && __PYX_LIMITED_VERSION_HEX < 0x030d0000
-static __Pyx_TypeName
-__Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp)
-{
-    PyObject *module = NULL, *name = NULL, *result = NULL;
-    #if __PYX_LIMITED_VERSION_HEX < 0x030b0000
-    name = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
-                                               __pyx_mstate_global->__pyx_n_u_qualname);
-    #else
-    name = PyType_GetQualName(tp);
-    #endif
-    if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) goto bad;
-    module = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
-                                               __pyx_mstate_global->__pyx_n_u_module);
-    if (unlikely(module == NULL) || unlikely(!PyUnicode_Check(module))) goto bad;
-    if (PyUnicode_CompareWithASCIIString(module, "builtins") == 0) {
-        result = name;
-        name = NULL;
-        goto done;
-    }
-    result = PyUnicode_FromFormat("%U.%U", module, name);
-    if (unlikely(result == NULL)) goto bad;
-  done:
-    Py_XDECREF(name);
-    Py_XDECREF(module);
-    return result;
-  bad:
-    PyErr_Clear();
-    if (name) {
-        result = name;
-        name = NULL;
-    } else {
-        result = __Pyx_NewRef(__pyx_mstate_global->__pyx_kp_u_);
-    }
-    goto done;
-}
-#endif
-
 /* PyObjectVectorCallKwBuilder (used by CIntToPy) */
 #if CYTHON_VECTORCALL
 static int __Pyx_VectorcallBuilder_AddArg(PyObject *key, PyObject *value, PyObject *builder, PyObject **args, int n) {
@@ -11862,6 +12454,45 @@ static CYTHON_INLINE PyObject* __Pyx_PyLong_From_long(long value) {
 #endif
     }
 }
+
+/* FormatTypeName */
+#if CYTHON_COMPILING_IN_LIMITED_API && __PYX_LIMITED_VERSION_HEX < 0x030d0000
+static __Pyx_TypeName
+__Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp)
+{
+    PyObject *module = NULL, *name = NULL, *result = NULL;
+    #if __PYX_LIMITED_VERSION_HEX < 0x030b0000
+    name = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
+                                               __pyx_mstate_global->__pyx_n_u_qualname);
+    #else
+    name = PyType_GetQualName(tp);
+    #endif
+    if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) goto bad;
+    module = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
+                                               __pyx_mstate_global->__pyx_n_u_module);
+    if (unlikely(module == NULL) || unlikely(!PyUnicode_Check(module))) goto bad;
+    if (PyUnicode_CompareWithASCIIString(module, "builtins") == 0) {
+        result = name;
+        name = NULL;
+        goto done;
+    }
+    result = PyUnicode_FromFormat("%U.%U", module, name);
+    if (unlikely(result == NULL)) goto bad;
+  done:
+    Py_XDECREF(name);
+    Py_XDECREF(module);
+    return result;
+  bad:
+    PyErr_Clear();
+    if (name) {
+        result = name;
+        name = NULL;
+    } else {
+        result = __Pyx_NewRef(__pyx_mstate_global->__pyx_kp_u_);
+    }
+    goto done;
+}
+#endif
 
 /* CIntFromPyVerify (used by CIntFromPy) */
 #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\

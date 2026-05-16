@@ -21,9 +21,10 @@ void AgentEnvironment::applyCalculateReturn(double discountRate,
   this->setRewardReturn(calculateReturn(discountRate, rewardReturn, returns));
 }
 
-double applyCalculatePolicyProb(double action, double state) {
+double AgentEnvironment::applyCalculatePolicyProb(double action, double state) {
   return applyCalculatePolicyProb(action, state);
 }
-double applyCalculateTransFunc(double action, double state) {
-  return applyCalculateTransFunc(action, state);
+double AgentEnvironment::applyCalculateTransFunc(double actions, double returns,
+                                                 double states) {
+  return calculateTransFunc(actions, returns, states);
 }

@@ -2,11 +2,9 @@ from libcpp.vector cimport vector
 
 cdef extern from "MDecisionProcess.hpp":
     cdef cppclass AgentEnvironment:
-        double calculateReturn(double discountRate, double rewardReturn,
-                     vector[double] returns);
-        double calculatePolicyProb(double action, double state);
-        double calculateTransFunc(double actions, double returns,
-                                double states);
+        double applyCalculateReturn(double discountRate, double rewardReturn, vector[double] returns)
+        double applyCalculatePolicyProb(double action, double state)
+        double applyCalculateTransFunc(double actions, double returns, double states);
         double getDiscountRate()
         double getRewardReturn()
         double getPolicy()
