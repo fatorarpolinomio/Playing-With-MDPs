@@ -95,12 +95,18 @@ double DynamicProgramming::ValueIteration(double discountRate,
 
   while (delta > threshold) {
     delta = 0.0;
+
+    // Congelamos os Valores da iteração ANTERIOR para a Equação de Bellman
+    // (Isso é o V(s') da fórmula)
+    std::vector<double> previousStateValues = this->stateValues;
+
+    // Varremos todos os estados
     for (int i = 0; i < states.size(); i++) {
-      double value = currentValues[i];
-      currentValues[i] = actionValueFunction(states[i], maxAction, discountRate,
-                                             currentValues, returns, states);
+      double value = this->stateValues[i];
+      this->stateValues[i] = actionValueFunction(
+          states[i], maxAction, discountRate, currentValues, returns, states);
       // Atualiza o delta com a maior diferença encontrada NESTA varredura
-      delta = std::max(delta, std::abs(value - currentValues[i]));
+      delta = std::max(delta, std::abs(value - this->stateValues[i]));
     }
   }
 
@@ -108,7 +114,7 @@ double DynamicProgramming::ValueIteration(double discountRate,
   for (double action : actions) {
 
     double temp = actionValueFunction(states[0], action, discountRate,
-                                      currentValues, returns, states);
+                                      this->stateValues, returns, states);
 
     argMax = temp > argMax ? temp : argMax;
   }

@@ -1,6 +1,6 @@
-#ifndef MDPs_HPP
-#define MDPs_HPP
+#pragma once
 
+#include <Eigen/Dense>
 #include <vector>
 
 class AgentEnvironment {
@@ -11,6 +11,8 @@ private:
   std::vector<double> returns;
   std::vector<double> actions;
   std::vector<double> states;
+  std::vector<Eigen::MatrixXd> transFuncPerAction;
+  std::vector<std::vector<double>> stateValues; // Lista de pontuações
 
   double calculateReturn(double discountRate, double rewardReturn,
                          std::vector<double> returns);
@@ -19,24 +21,27 @@ private:
   // Dependendo da situação, já teremos tudo tabelado na forma de uma matriz
   // Para cenários onde teremos um grande quantidade de probalidades,
   // teremos que "automatizar" na forma de um algoritmo
-  virtual double calculatePolicyProb(double action, double state) {
-    return 0.0;
-  }
-  virtual double calculateTransFunc(double actions, double returns,
-                                    double states) {
-    return 0.0;
-  }
+  //
+  // Essas funções vão se basear em consulta à matriz de transição
+  double calculatePolicyProb(double action, double state);
+  double calculateTransFunc(double action, double startState, double returns,
+                            double states,
+                            std::vector<Eigen::MatrixXd> &transFuncPerAction);
 
 public:
   // Getters
+  std::vector<std::vector<std::vector<double>>> getTransFuncAsVectors();
   double getDiscountRate() { return discountRate; }
   double getRewardReturn() { return rewardReturn; }
   double getPolicy() { return policy; }
   std::vector<double> getReturns() { return returns; }
   std::vector<double> getActions() { return actions; }
   std::vector<double> getStates() { return states; }
+  std::vector<std::vector<double>> getStateValues() { return stateValues; }
 
   // Setters
+  void setTransFuncFromVectors(
+      const std::vector<std::vector<std::vector<double>>> &matrizes3D);
   void setDiscountRate(double discountRate) {
     this->discountRate = discountRate;
   }
@@ -47,10 +52,15 @@ public:
   void setReturns(std::vector<double> returns) { this->returns = returns; }
   void setActions(std::vector<double> actions) { this->actions = actions; }
   void setStates(std::vector<double> states) { this->states = states; }
+  void setStateValues(std::vector<std::vector<double>> stateValues) {
+    this->stateValues = stateValues;
+  }
+
   void applyCalculateReturn(double discountRate, double rewardReturn,
                             std::vector<double> returns);
   double applyCalculatePolicyProb(double action, double state);
-  double applyCalculateTransFunc(double actions, double returns, double states);
+  double applyCalculateTransFunc(double action, double startState,
+                                 double returns, double states);
 };
 
 class ValueFunctions : public AgentEnvironment {
@@ -67,9 +77,9 @@ private:
 
 public:
   double actionValueFunction(double state, double action, double discountRate,
-                             std::vector<double> currentValues,
-                             std::vector<double> returns,
-                             std::vector<double> states);
+                             std::vector<double> &currentValues,
+                             std::vector<double> &returns,
+                             std::vector<double> &states);
   // Construtor
   ValueFunctions(double rewardValue, double discountRate);
   // Getters
@@ -146,5 +156,3 @@ public:
   // Setters
   void setThreshold(double value) { threshold = value; }
 };
-
-#endif // MDPs_HPP

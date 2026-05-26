@@ -60,6 +60,25 @@ cdef class PyAgentEnvironment:
     def states(self, list states):
         self.c_ae.setStates(states)
 
+    @property
+    def trans_func_per_action(self):
+        # Lê do C++ (converte vector 3D para lista do Python automaticamente)
+        return self.c_ae.getTransFuncAsVectors()
+
+    @property
+    def state_values(self):
+        return self.c_ae.getStateValues()
+
+    @state_values.setter
+    def state_values(self, list state_values):
+        self.c_ae.setStateValues(state_values)
+
+    @trans_func_per_action.setter
+    def trans_func_per_action(self, list matrizes):
+        # Pega a lista do Python, tipa como vector 3D, e envia pro C++
+        cdef vector[vector[vector[double]]] c_matrizes = matrizes
+        self.c_ae.setTransFuncFromVectors(c_matrizes)
+
     def apply_calculate_return(self, double discountRate, double rewardReturn, list returns):
         cdef vector[double] c_returns = returns
         self.c_ae.applyCalculateReturn(discountRate, rewardReturn, c_returns)

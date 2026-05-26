@@ -50,9 +50,9 @@ double ValueFunctions::bellmanEquation(double state, double discountRate,
 // "Qual o retorno esperado se eu tomar a ação 'action' no estado 'state'?"
 double ValueFunctions::actionValueFunction(double state, double action,
                                            double discountRate,
-                                           std::vector<double> currentValues,
-                                           std::vector<double> returns,
-                                           std::vector<double> states) {
+                                           std::vector<double> &currentValues,
+                                           std::vector<double> &returns,
+                                           std::vector<double> &states) {
   double expectedValue = 0;
 
   // Loop duplo: representa o somatório para todos os outros
@@ -60,8 +60,9 @@ double ValueFunctions::actionValueFunction(double state, double action,
   for (int j = 0; j < states.size(); j++) {
     for (int k = 0; k < returns.size(); k++) {
 
-      // Usando o parâmetro 'action' diretamente
-      double transProb = applyCalculateTransFunc(action, returns[k], states[j]);
+      // Usando o parâmetro 'action' e 'state'diretamente
+      double transProb =
+          applyCalculateTransFunc(state, action, returns[k], states[j]);
 
       // Distribuindo a probabilidade de transição
       expectedValue += transProb * returns[k];

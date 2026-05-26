@@ -8,15 +8,19 @@ cdef extern from "MDecisionProcess.hpp":
         double getDiscountRate()
         double getRewardReturn()
         double getPolicy()
+        vector[vector[vector[double]]] getTransFuncAsVectors()
         vector[double] getReturns()
         vector[double] getActions()
         vector[double] getStates()
+        vector[vector[double]] getStateValues()
         void setDiscountRate(double discountRate)
         void setRewardReturn(double rewardReturn)
         void setPolicy(double value)
         void setReturns(vector[double] returns)
         void setActions(vector[double] actions)
         void setStates(vector[double] states)
+        void setTransFuncFromVectors(vector[vector[vector[double]]] matrizes3D)
+        void setStateValues(vector[vector[double]] stateValues)
 
     cdef cppclass ValueFunctions(AgentEnvironment):
         double actionValueFunction(double state, double action, double discountRate,
