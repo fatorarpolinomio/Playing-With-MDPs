@@ -15,7 +15,9 @@ double AgentEnvironment::calculateReturn(double discountRate,
   return rewardReturn;
 }
 
-double AgentEnvironment::calculatePolicyProb(double action, double state) {}
+double AgentEnvironment::calculatePolicyProb(double action, double state) {
+  return 0.0;
+}
 
 // A tabela das probabilidades de transição muda com base nas ações. Se eu
 // escolher tomar uma ação, uma tabela específica para aquela ação deverá ser
@@ -31,8 +33,20 @@ double AgentEnvironment::calculateTransFunc(
   size_t indiceAcao = static_cast<size_t>(action);
   size_t linhaOrigem = static_cast<size_t>(startState);
   size_t colunaDestino = static_cast<size_t>(states);
+
+  // O .at() vai travar se a Ação não existir na lista de matrizes
+  auto &matriz = transFuncPerAction.at(indiceAcao);
+
+  // Trava de segurança manual para o Eigen (já que o NDEBUG está ativado)
+  if (linhaOrigem >= matriz.rows() || colunaDestino >= matriz.cols()) {
+    std::string erro =
+        "ERRO EIGEN: Tentou acessar Linha " + std::to_string(linhaOrigem) +
+        ", Coluna " + std::to_string(colunaDestino) + ". Mas a matriz eh " +
+        std::to_string(matriz.rows()) + "x" + std::to_string(matriz.cols());
+    throw std::out_of_range(erro);
+  }
   // Acessando e retornando a probabilidade de transição correspondente
-  return transFuncPerAction[indiceAcao](linhaOrigem, colunaDestino);
+  return matriz(linhaOrigem, colunaDestino);
 }
 
 // Método da interface pública, apenas para aplicar o método
@@ -98,3 +112,4 @@ void AgentEnvironment::setTransFuncFromVectors(
     }
     this->transFuncPerAction.push_back(matriz);
   }
+}

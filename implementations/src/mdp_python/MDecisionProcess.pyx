@@ -66,12 +66,18 @@ cdef class PyAgentEnvironment:
         return self.c_ae.getTransFuncAsVectors()
 
     @property
-    def state_values(self):
+    def get_state_values(self):
         return self.c_ae.getStateValues()
 
-    @state_values.setter
-    def state_values(self, list state_values):
-        self.c_ae.setStateValues(state_values)
+    def get_state_value_by_index(self, int index):
+        return self.c_ae.getStateValueByIndex(index)
+
+    def set_state_value_by_index(self, int index, double value):
+        self.c_ae.setStateValueByIndex(index, value)
+
+    def set_state_values(self, list state_values):
+        cdef vector[double] c_values = state_values
+        self.c_ae.setStateValues(c_values)
 
     @trans_func_per_action.setter
     def trans_func_per_action(self, list matrizes):
@@ -86,8 +92,8 @@ cdef class PyAgentEnvironment:
     def apply_calculate_policy_prob(self, double action, double state):
         return self.c_ae.applyCalculatePolicyProb(action, state)
 
-    def apply_calculate_trans_func(self, double actions, double returns, double states):
-        return self.c_ae.applyCalculateTransFunc(actions, returns, states)
+    def apply_calculate_trans_func(self, double actions, double start_state, double returns, double states):
+        return self.c_ae.applyCalculateTransFunc(actions, start_state, returns, states)
 
 
 cdef class PyValueFunctions:
@@ -179,13 +185,31 @@ cdef class PyDynamicProgramming(PyValueFunctions):
 
         return c_currentValues, c_policy_per_state
 
-    def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list currentValues, list actions, list returns, list states):
-        cdef vector[double] c_currentValues = currentValues
+    def apply_value_iteration(self, double discountRate, double rewardValue, double threshold, list actions, list returns, list states):
+        # Converte as listas do Python para os vetores estritos do C++
+        cdef vector[double] c_actions = actions
         cdef vector[double] c_returns = returns
         cdef vector[double] c_states = states
-        cdef vector[double] c_actions = actions
+        # Chama o motor! O resultado C++ é armazenado num vetor nativo
+        cdef vector[double] c_policy = (<DynamicProgramming*>self.c_vf).applyValueIter(
+                    discountRate, rewardValue, threshold, c_actions, c_returns, c_states
+                )
+        # Retorna direto para o Python!
+        # O Cython entende que 'c_policy' é um vector e converte para 'list' instantaneamente.
+        return c_policy
+
+    def set_trans_func_per_action(self, list matrizes):
+        # Converte a lista 3D do Python para o formato vector do C++
+        cdef vector[vector[vector[double]]] c_matrizes = matrizes
+        # O C++ entende isso perfeitamente graças à herança no .pxd!
+        (<DynamicProgramming*>self.c_vf).setTransFuncFromVectors(c_matrizes)
 
 
-        (<DynamicProgramming*>self.c_vf).applyValueIter(discountRate, rewardValue, threshold, c_currentValues, c_actions, c_returns, c_states)
+    def set_state_values(self, list state_values):
+        # Converte a lista zerada do Python para o vetor C++
+        cdef vector[double] c_values = state_values
+        # Envia para a memória base usando o nosso cast certeiro!
+        (<DynamicProgramming*>self.c_vf).setStateValues(c_values)
 
-        return c_currentValues
+    def get_state_values(self):
+        return (<DynamicProgramming*>self.c_vf).getStateValues()

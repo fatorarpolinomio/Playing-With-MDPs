@@ -4,7 +4,7 @@ cdef extern from "MDecisionProcess.hpp":
     cdef cppclass AgentEnvironment:
         double applyCalculateReturn(double discountRate, double rewardReturn, vector[double] returns)
         double applyCalculatePolicyProb(double action, double state)
-        double applyCalculateTransFunc(double actions, double returns, double states);
+        double applyCalculateTransFunc(double actions, double startState, double returns, double states);
         double getDiscountRate()
         double getRewardReturn()
         double getPolicy()
@@ -12,7 +12,8 @@ cdef extern from "MDecisionProcess.hpp":
         vector[double] getReturns()
         vector[double] getActions()
         vector[double] getStates()
-        vector[vector[double]] getStateValues()
+        vector[double] getStateValues()
+        double getStateValueByIndex(int index)
         void setDiscountRate(double discountRate)
         void setRewardReturn(double rewardReturn)
         void setPolicy(double value)
@@ -20,13 +21,14 @@ cdef extern from "MDecisionProcess.hpp":
         void setActions(vector[double] actions)
         void setStates(vector[double] states)
         void setTransFuncFromVectors(vector[vector[vector[double]]] matrizes3D)
-        void setStateValues(vector[vector[double]] stateValues)
+        void setStateValues(vector[double] stateValues)
+        void setStateValueByIndex(int index, double value)
 
     cdef cppclass ValueFunctions(AgentEnvironment):
         double actionValueFunction(double state, double action, double discountRate,
-                             vector[double] currentValues,
-                             vector[double] returns,
-                             vector[double] states);
+                             const vector[double] currentValues,
+                             const vector[double] returns,
+                             const vector[double] states);
         ValueFunctions(double rewardValue, double discountRate) except +
 
         double getRewardValue()
@@ -56,8 +58,7 @@ cdef extern from "MDecisionProcess.hpp":
                       vector[double] actions, vector[double] returns,
                       vector[double] states,
                       vector[double] &policyPerState);
-        void applyValueIter(double discountRate, double rewardValue, double threshold,
-                     vector[double] &currentValues,
+        vector[double] applyValueIter(double discountRate, double rewardValue, double threshold,
                      vector[double] actions, vector[double] returns,
                      vector[double] states);
         double getThreshold()

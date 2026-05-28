@@ -12,7 +12,7 @@ private:
   std::vector<double> actions;
   std::vector<double> states;
   std::vector<Eigen::MatrixXd> transFuncPerAction;
-  std::vector<std::vector<double>> stateValues; // Lista de pontuações
+  std::vector<double> stateValues; // Lista de pontuações
 
   double calculateReturn(double discountRate, double rewardReturn,
                          std::vector<double> returns);
@@ -37,7 +37,8 @@ public:
   std::vector<double> getReturns() { return returns; }
   std::vector<double> getActions() { return actions; }
   std::vector<double> getStates() { return states; }
-  std::vector<std::vector<double>> getStateValues() { return stateValues; }
+  const std::vector<double> &getStateValues() const { return stateValues; }
+  double getStateValueByIndex(int index) { return stateValues[index]; }
 
   // Setters
   void setTransFuncFromVectors(
@@ -52,8 +53,11 @@ public:
   void setReturns(std::vector<double> returns) { this->returns = returns; }
   void setActions(std::vector<double> actions) { this->actions = actions; }
   void setStates(std::vector<double> states) { this->states = states; }
-  void setStateValues(std::vector<std::vector<double>> stateValues) {
+  void setStateValues(std::vector<double> stateValues) {
     this->stateValues = stateValues;
+  }
+  void setStateValueByIndex(int index, double value) {
+    this->stateValues[index] = value;
   }
 
   void applyCalculateReturn(double discountRate, double rewardReturn,
@@ -77,9 +81,9 @@ private:
 
 public:
   double actionValueFunction(double state, double action, double discountRate,
-                             std::vector<double> &currentValues,
-                             std::vector<double> &returns,
-                             std::vector<double> &states);
+                             const std::vector<double> &currentValues,
+                             const std::vector<double> &returns,
+                             const std::vector<double> &states);
   // Construtor
   ValueFunctions(double rewardValue, double discountRate);
   // Getters
@@ -118,11 +122,11 @@ private:
                        std::vector<double> actions, std::vector<double> returns,
                        std::vector<double> states,
                        std::vector<double> &policyPerState);
-  double ValueIteration(double discountRate, double rewardValue,
-                        double threshold, std::vector<double> &currentValues,
-                        std::vector<double> actions,
-                        std::vector<double> returns,
-                        std::vector<double> states);
+  std::vector<double> ValueIteration(double discountRate, double rewardValue,
+                                     double threshold,
+                                     std::vector<double> actions,
+                                     std::vector<double> returns,
+                                     std::vector<double> states);
 
 public:
   // Construtor
@@ -143,12 +147,13 @@ public:
     PolicyIteration(discountRate, rewardValue, threshold, currentValues,
                     actions, returns, states, policyPerState);
   }
-  void applyValueIter(double discountRate, double rewardValue, double threshold,
-                      std::vector<double> &currentValues,
-                      std::vector<double> actions, std::vector<double> returns,
-                      std::vector<double> states) {
-    ValueIteration(discountRate, rewardValue, threshold, currentValues, actions,
-                   returns, states);
+  std::vector<double> applyValueIter(double discountRate, double rewardValue,
+                                     double threshold,
+                                     std::vector<double> actions,
+                                     std::vector<double> returns,
+                                     std::vector<double> states) {
+    return ValueIteration(discountRate, rewardValue, threshold, actions,
+                          returns, states);
   }
 
   // Getters

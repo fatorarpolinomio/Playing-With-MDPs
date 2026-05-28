@@ -10,7 +10,10 @@ ext_modules = [
             "cpp_core/DynamicProgramming.cpp",  # A implementação C++
             "cpp_core/ValueFunctions.cpp",  # (Adicione se você os separou em arquivos diferentes)
         ],
-        include_dirs=["cpp_core"],  # Onde o compilador vai achar os arquivos .hpp
+        include_dirs=[
+            "cpp_core",
+            "/usr/include/eigen3",
+        ],  # Onde o compilador vai achar os arquivos .hpp
         language="c++",  # Avisa que estamos usando C++ e não C
     )
 ]

@@ -31,7 +31,7 @@ double ValueFunctions::bellmanEquation(double state, double discountRate,
       for (int k = 0; k < returns.size(); k++) {
 
         double transProb =
-            applyCalculateTransFunc(actions[i], returns[k], states[j]);
+            applyCalculateTransFunc(actions[i], state, returns[k], states[j]);
         // Para ficar mais palatável, decidi "distribuir" a calculateTransFunc()
         // para os membros dos colchetes da equação
         actionExpectedValue += transProb * returns[k];
@@ -48,26 +48,23 @@ double ValueFunctions::bellmanEquation(double state, double discountRate,
 
 // Equação de Valor de Ação (Q-Value)
 // "Qual o retorno esperado se eu tomar a ação 'action' no estado 'state'?"
-double ValueFunctions::actionValueFunction(double state, double action,
-                                           double discountRate,
-                                           std::vector<double> &currentValues,
-                                           std::vector<double> &returns,
-                                           std::vector<double> &states) {
+double ValueFunctions::actionValueFunction(
+    double state, double action, double discountRate,
+    const std::vector<double> &currentValues,
+    const std::vector<double> &returns, const std::vector<double> &states) {
+
   double expectedValue = 0;
 
-  // Loop duplo: representa o somatório para todos os outros
-  // estados e todas as recompensas
+  // Um único loop: Varremos os estados futuros (s')
   for (int j = 0; j < states.size(); j++) {
-    for (int k = 0; k < returns.size(); k++) {
 
-      // Usando o parâmetro 'action' e 'state'diretamente
-      double transProb =
-          applyCalculateTransFunc(state, action, returns[k], states[j]);
+    // Qual a chance de ir do 'state' para o estado futuro 'j' usando a
+    // 'action'?
+    double transProb = applyCalculateTransFunc(action, state, 0, states.at(j));
 
-      // Distribuindo a probabilidade de transição
-      expectedValue += transProb * returns[k];
-      expectedValue += transProb * discountRate * currentValues[j];
-    }
+    // O agente ganha a recompensa do estado futuro + o valor descontado dele
+    expectedValue +=
+        transProb * (returns.at(j) + (discountRate * currentValues.at(j)));
   }
 
   return expectedValue;
