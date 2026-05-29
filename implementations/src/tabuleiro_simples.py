@@ -1,23 +1,6 @@
 # import numpy as np
+import numpy as np
 from mdp_python.MDecisionProcess import PyDynamicProgramming
-
-# def value_iteration(discountRate : float, threshold : float, actions : list, returns : list, states : list):
-#    # Inicializa maior que o threshold para entrar no while
-#    delta = threshold + 1.0
-#    state_values = np.array([]) # Inicializando array
-#    state_values.fill(0) # Colocando tudo pra 0
-#
-#    while delta > threshold:
-#        delta = 0.0
-#
-#        # Varrendo todos os estados
-#        for state in states:
-#            oldValue = state_values[state]
-#            max_value = -1e9
-#
-#            for action in actions:
-#                temp =
-
 
 # Dados:
 d1 = [1, 2, 3]
@@ -25,6 +8,7 @@ d2 = [1, 2]
 
 estados = [0, 1, 2, 3, 4, 5]  # Dizem respeito às posições no tabuleiro
 acoes = [0, 1]  # Dizem respeito às escolhas de dados
+
 # Objetivo: partindo da 1, chegar na posição 6 o mais rápido possível
 
 # MDP - Função de transição - p: S x R x R x A -> [0, 1]
@@ -76,3 +60,53 @@ politica = prog_dinamica.apply_value_iteration(
 print("Valores dos Estados V(s):", prog_dinamica.get_state_values())
 
 print("Política extraída:", politica)
+
+
+def value_iteration(discount_rate: float, threshold: float, actions : list, states: list, rewards : list, trans_func_per_action : list):
+
+    # Vamos inicializar V(s) para todo estado pertencente
+    # ao nosso conjunto de estados
+    state_values = np.zeros(len(states))
+
+    # Definindo um Delta maior que Threshold,
+    # para que ele consiga entrar no while
+    delta = threshold + 1.0
+
+    # Loop principal
+    while delta > threshold:
+        delta = 0.0
+        for single_state in states:
+            # Primeira atribuição dentro do loop
+            old_value = state_values[single_state]  # v <- V(s)
+
+            # Para o próximo passo, vamos inicializar max_value
+            max_value = -1e9
+            # Vamos iterar por todas as ações para encontrar a ação
+            # que maximiza o valor retornado pela Action Value Function
+            for single_action in actions:
+                temp = 0.0
+                # Rodando a Action Value Function,
+                # ao mesmo tempo que pegamos a ação que maximiza o
+                # valor retornado
+                for single_state_apostrophe in states:
+                    for single_reward in rewards:
+                        matriz = trans_func_per_action[single_action]
+                        trans_prob = matriz[single_state, single_state_apostrophe]
+                        expected_value = trans_prob * (rewards[single_state_apostrophe] + (discount_rate * state_values[single_state_apostrophe]))
+                        temp = expected_value
+                # Atualizando max_value, se necessário
+                if temp > max_value:
+                    max_value = temp
+            # Atualizando a lista com maior valor
+            state_values[single_state] = max_value
+            # Pegando o maior valor entre os dois
+            delta = max(delta, abs(old_value - state_values[single_state]))
+
+    optimal_policy = np.zeros(len(states))
+
+    for single_state in states:
+        max_value = -1e9
+        best_action = actions[0]
+
+        for single_action in actions:
+            temp =
