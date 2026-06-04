@@ -45,7 +45,7 @@ def iterative_value_iteration(
                             + (discount_rate * state_values[single_state_apostrophe])
                         )
                         temp += expected_value
-                # Atualizando max_value, se necessário
+                # Atualizando max_value e best_action, se necessário
                 if temp > max_value:
                     max_value = temp
                     best_action = single_action
@@ -82,9 +82,8 @@ def vetorial_value_iteration(
     delta = threshold + 1.0
 
     # Loop principal de convergência
-    delta = threshold + 1.0
-    # Loop principal de convergência
     while delta > threshold:
+        delta = 0.0
         # EQUAÇÃO DE BELLMAN EM 2 LINHAS
         # Passo 1: Calcula o [ R(s') + gama * V(s') ] para todos os estados de uma vez
         v_target = rewards_numpy + (discount_rate * state_values)

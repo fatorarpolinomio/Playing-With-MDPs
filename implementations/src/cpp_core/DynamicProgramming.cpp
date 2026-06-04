@@ -91,6 +91,7 @@ std::vector<double> DynamicProgramming::ValueIteration(
   double delta = threshold + 1.0;
 
   std::vector<double> initialValues(states.size(), 0.0);
+  std::vector<double> optimalPolicy(states.size(), 0.0);
   this->setStateValues(initialValues);
 
   while (delta > threshold) {
@@ -100,6 +101,7 @@ std::vector<double> DynamicProgramming::ValueIteration(
     for (int i = 0; i < states.size(); i++) {
       double oldValue = this->getStateValueByIndex(i);
       double max_value = -1e9;
+      double best_action = actions.at(0);
 
       for (double action : actions) {
         double temp =
@@ -109,33 +111,16 @@ std::vector<double> DynamicProgramming::ValueIteration(
                   << " | Valor Temp: " << temp << std::endl;
         if (temp > max_value) {
           max_value = temp;
+          best_action = action;
         }
       }
       // V(s) <- max_a...
       this->setStateValueByIndex(i, max_value);
+      optimalPolicy[i] = best_action;
       // Atualiza o delta com a maior diferença encontrada NESTA varredura)
       delta =
           std::max(delta, std::abs(oldValue - this->getStateValueByIndex(i)));
     }
-  }
-
-  std::vector<double> optimalPolicy(states.size(), 0.0);
-
-  for (size_t i = 0; i < states.size(); i++) {
-    double max_value = -1e9;
-    double best_action = actions.at(0);
-
-    for (double action : actions) {
-      double temp =
-          actionValueFunction(states.at(i), action, discountRate,
-                              this->getStateValues(), returns, states);
-
-      if (temp > max_value) {
-        max_value = temp;
-        best_action = action; // Guarda a AÇÃO, e não o valor de Bellman
-      }
-    }
-    optimalPolicy[i] = best_action;
   }
 
   return optimalPolicy;
