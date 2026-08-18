@@ -1,6 +1,8 @@
 # import numpy as np
 import numpy as np
 from mdp_python.MDecisionProcess import PyDynamicProgramming
+import python_version.value_iteration as vi
+import python_version.trans_func as tf
 
 # Dados:
 d1 = [1, 2, 3]
@@ -15,21 +17,21 @@ acoes = [0, 1]  # Dizem respeito às escolhas de dados
 # Linha = posição atual no tabuleiro
 # Coluna = probabilidade de cair naquela posição jogando o dado
 transicao_dado1 = [
-    [0, 1 / 3, 1 / 3, 1 / 3, 0, 0],
-    [0, 0, 1 / 3, 1 / 3, 1 / 3, 0],
-    [0, 0, 0, 1 / 3, 1 / 3, 1 / 3],
-    [0, 0, 0, 0, 2 / 3, 1 / 3],
-    [0, 0, 0, 1 / 3, 1 / 3, 1 / 3],
-    [0, 0, 0, 0, 0, 1],
+    [0, 1 / 3, 1 / 3, 1 / 3,   0,     0],
+    [0,   0,   1 / 3, 1 / 3, 1 / 3,   0],
+    [0,   0,     0,   1 / 3, 1 / 3, 1 / 3],
+    [0,   0,     0,     0,   2 / 3, 1 / 3],
+    [0,   0,     0,   1 / 3, 1 / 3, 1 / 3],
+    [0,   0,     0,     0,     0,     1],
 ]
 
 transicao_dado2 = [
-    [0, 1 / 2, 1 / 2, 0, 0, 0],
-    [0, 0, 1 / 2, 1 / 2, 0, 0],
-    [0, 0, 0, 1 / 2, 1 / 2, 0],
-    [0, 0, 0, 0, 1 / 2, 1 / 2],
-    [0, 0, 0, 0, 1 / 2, 1 / 2],
-    [0, 0, 0, 0, 0, 1],
+    [0, 1 / 2, 1 / 2,   0,     0,     0],
+    [0,   0,   1 / 2, 1 / 2,   0,     0],
+    [0,   0,     0,   1 / 2, 1 / 2,   0],
+    [0,   0,     0,     0,   1 / 2, 1 / 2],
+    [0,   0,     0,     0,   1 / 2, 1 / 2],
+    [0,   0,     0,     0,     0,     1],
 ]
 
 trans_func_per_action = [transicao_dado1, transicao_dado2]
@@ -38,21 +40,20 @@ recompensas_por_estado = [-1, -1, -1, -1, -1, 0]
 
 discountRate = 1
 
+politica_otima = vi.iterative_value_iteration(discountRate, 0.0001, acoes, estados, recompensas_por_estado, trans_func_per_action)
 
-prog_dinamica = PyDynamicProgramming(0, discountRate, 7)
-print("Injetando valores zerados...")
-prog_dinamica.set_state_values([0.0] * len(estados))
-print("Enviando Matriz de Transição...")
-prog_dinamica.set_trans_func_per_action(trans_func_per_action)
-print("Iniciando Value Iteration (O C++ vai assumir o controle)...")
-print("--- INVESTIGAÇÃO DO VETOR DE TAMANHO 2 ---")
-print("Ações cadastradas:", acoes)
-print("Qtd de Matrizes de Ação:", len(trans_func_per_action))
-print("Estados cadastrados:", estados)
-print("Qtd de Recompensas:", len(recompensas_por_estado))
-print("------------------------------------------")
-politica = prog_dinamica.apply_value_iteration(
-    discountRate, 0, 0.0001, acoes, recompensas_por_estado, estados
-)
-print("Valores dos Estados V(s):", prog_dinamica.get_state_values())
-print("Política extraída:", politica)
+print("Printando versão iterativa")
+print(politica_otima)
+
+# print("Printando v2")
+# politica_otima2 = vi.iterative_value_iteration_v2(discountRate, 0.0001, acoes, estados, recompensas_por_estado, trans_func_per_action)
+# print(politica_otima2)
+
+print("Printando exemplo pra debug:")
+
+for number in [0, 1, 2, 3, 4, 5]:
+    line = []
+    for estado in estados:
+        # print(f"Para o caso {number} -> {estado}")
+        line.append(tf.transition_function(number, estado, 5, estados, d2))
+    print(line)

@@ -1,4 +1,88 @@
 import numpy as np
+import python_version.trans_func as tf
+
+# Pr(s'|s, a) -> Versão simplificada para o exemplo do jogo de tabuleiro
+
+def compute_trans_prob(final_state : float, start_state : float, states : list, action_len : float):
+    trans_prob = 0.0 # Atribuindo um valor padrão
+
+    # Se o deslocamento não for negativo ou nulo,
+    # e for possível alcançar através da ação tomada
+    if (final_state - start_state) > 0 and (final_state - start_state) <= action_len:
+
+        # Calcula a probabilidade de ir pra lá tomando a ação em questão
+        trans_prob = float(trans_prob + (1 / action_len))
+
+    # Se é possível fazer o retorno, precisamos computar
+    elif (final_state - start_state) == 0 and (start_state + action_len + 1) > len(states):
+        trans_prob = float(trans_prob + (1 / action_len))
+    # Se está no estado final, já acabou
+
+    if (start_state + 1) == len(states) and final_state + 1 == len(states):
+        return 1.0
+
+    return trans_prob
+
+def iterative_value_iteration_v2(
+    discount_rate: float,
+    threshold: float,
+    actions: list[int],
+    states: list[int],
+    rewards: list[int],
+    trans_func_per_action: list[int],
+):
+    # Vamos inicializar V(s) para todo estado pertencente
+    # ao nosso conjunto de estados
+    state_values = np.zeros(len(states))
+
+    # Definindo lista de políticas ótimas para cada estado
+    optimal_policy = np.zeros(len(states))
+    # Definindo um Delta maior que Threshold,
+    # para que ele consiga entrar no while
+    delta = threshold + 1.0
+
+    # Loop principal
+    while delta > threshold:
+        delta = 0.0
+        for single_state in states:
+            # Primeira atribuição dentro do loop
+            old_value = state_values[single_state]  # v <- V(s)
+            best_action = actions[0]
+            # Para o próximo passo, vamos inicializar max_value
+            max_value = -1e9
+            # Vamos iterar por todas as ações para encontrar a ação
+            # que maximiza o valor retornado pela Action Value Function
+            for single_action in actions:
+                temp = 0.0
+                # Rodando a Action Value Function,
+                # ao mesmo tempo que pegamos a ação que maximiza o
+                # valor retornado
+                for single_state_apostrophe in states:
+                    trans_prob = 0.0
+                    if single_action == actions[0]:
+                        trans_prob = tf.transition_function(single_state, single_state_apostrophe, 5, states, 2)
+                    elif single_action == actions[1]:
+                        trans_prob = tf.transition_function(single_state, single_state_apostrophe, 5, states, 3)
+
+
+                    expected_value = trans_prob * (
+                        rewards[single_state_apostrophe]
+                        + (discount_rate * state_values[single_state_apostrophe])
+                    )
+                    temp += expected_value
+                # Atualizando max_value e best_action, se necessário
+                if temp > max_value:
+                    max_value = temp
+                    best_action = single_action
+            # Atualizando a política ótima
+            optimal_policy[single_state] = best_action
+            # Atualizando a lista com maior valor
+            state_values[single_state] = max_value
+            # Pegando o maior valor entre os dois
+            delta = max(delta, abs(old_value - state_values[single_state]))
+    print("Valores de Estado:", state_values)
+    return optimal_policy
+
 
 
 def iterative_value_iteration(
@@ -9,6 +93,7 @@ def iterative_value_iteration(
     rewards: list,
     trans_func_per_action: list,
 ):
+
 
     # Vamos inicializar V(s) para todo estado pertencente
     # ao nosso conjunto de estados
