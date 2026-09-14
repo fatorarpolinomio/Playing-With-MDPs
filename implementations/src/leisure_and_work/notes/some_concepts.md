@@ -2,6 +2,8 @@
 
 Aqui, para que eu tenha local facilitado de consulta, anotarei um resumo acerca de conceitos que deverão ser aplicados nesta modelagem.
 
+## Equação de Bellman
+
 ## Augmented State
 
 O **aumento de estado** é uma técnica utilizada para **"Markovizar"** um problema onde a representação do **estado-padrão** falha ao capturar o histórico ou restrições.
