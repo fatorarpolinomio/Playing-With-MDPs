@@ -22,4 +22,23 @@ Utilizar um **Estado Aumentado** faz com que agentes otimizem objetivos respeita
 
 ## Horizonte Finito
 
+> Será que ele falou a respeito de horizonte finito justamente porque eu trouxe como opção para modelagem o agente "sobreviver" a uma quantidade limitada de *timestamps*?
+
+De acordo com o professor:
+
+Com relação ao horizonte para o qual se estende o processo,
+pode-se ter três opções: horizonte finito, horizonte infinito, e ho-
+rizonte indeterminado. No caso do horizonte finito, é definido um
+horizonte máximo N , de tal forma que o processo continua enquanto t menor ou igual a N . No caso do horizonte infinito, o processo nunca
+para. Finalmente, no horizonte indeterminado, considera-se estados absorvedores, usualmente um conjunto de estados metas G, de
+tal forma que o processo acaba quando st pertence a G.
+
+Existem versões alternativas dos algoritmos aprendidos. Temos um **ValueIteration** para Horizonte finito, **Policy Iteration**, etc.
+
+Imagino que, caso seja optado por seguir essa vertente, terei de implementar as versões alternativas.
+
+# Teoria da Utilidade Esperada
+
+## Função de Utilidade
+
 ## Neutralidade ao Risco
