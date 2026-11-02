@@ -21,6 +21,16 @@ def subconj_generator(lista):
         # Gera combinações de tamanho 'r' e converte em listas
         combinacoes = itertools.combinations(lista, r)
         subconjuntos.extend([list(c) for c in combinacoes])
+
+    # Fase de higiene
+    subconjuntos.remove([]) # Retirando o conjunto vazio
+    remover_do_subconj = []
+    for sc in subconjuntos:
+        if [0, 0, 0, 0] not in sc:
+            remover_do_subconj.append(sc) # Salvar em uma lista pra não ter problema com loop
+    for elemento in remover_do_subconj:
+        subconjuntos.remove(elemento)
+
     return subconjuntos
 
 # Função geradora de trabalhos "aleatórios", com diferentes probabilidades
@@ -75,29 +85,23 @@ def work_collection_generator(work_qnt: int):
     return work_collection
 
 # Função que cria um conjunto de estados com base numa lista de trabalhos pré-existente
-# Input: lista de trabalhos)work_prob
+# Input: lista de trabalhos e o teto de recompensa
 # Output: coleção de estados baseados nos trabalhos pré-existentes
 def state_collection_creator(work_collection: list, max_reward: int):
 
     state_collection = []
     works_subconj = subconj_generator(work_collection)
 
-    for work in work_collection:
-        new_state = []
-        new_state.append(work)
-
+    for current_work in work_collection:
         for subconj in works_subconj:
             available_works = []
-            if [0, 0, 0, 0] in subconj:
-                available_works.append(subconj)
-            if [0, 0, 0, 0] not in subconj:
-                available_works = [[0, 0, 0, 0]] # O trabalho sempre estará disponível
-                available_works.append(subconj)
-            new_state.append(available_works)
 
-            for reward in range(max_reward):
-                new_state.append(max_reward)
-        state_collection.append(new_state)
+            for work in subconj:
+                available_works.append(work)
+
+            for reward in range(max_reward + 1):
+                new_state = [current_work, available_works, reward]
+                state_collection.append(new_state)
 
     return state_collection
 
@@ -118,10 +122,6 @@ actions = [0, 1] # Negar ou aceitar um trabalho
 
 
 works = work_collection_generator(2)
-print("LISTA DE TRABALHOS:")
-for work in works:
-    print(work)
-
 states = state_collection_creator(works, 2)
 
 print("LISTA DE ESTADOS - MÁXIMO DE PONTUAÇÃO = 2")
