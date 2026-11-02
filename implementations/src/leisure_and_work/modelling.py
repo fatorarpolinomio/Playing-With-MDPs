@@ -108,12 +108,19 @@ def state_collection_creator(work_collection: list, max_reward: int):
 # Função para sortear trabalho(s) e adicionar na lista de trabalhos disponíveis
 # Input: conjunto de possíveis trabalhos + lista de trabalhos disponíveis
 # Output: lista de trabalhos disponíveis atualizada
-def update_available_list(works: list, available_works: list):
-    rng = np.random.default_rng()
-    work_qnt = int(rng.uniform(0, 4))
-    if work_qnt > 0:
-        for work in range(work_qnt):
-            available_works.append(rng.choice(works))
+def add_in_available_list(work_collection: list, available_works: list):
+
+    probs = np.array([work[3] for work in work_collection], dtype=float)
+
+    # Realiza o sorteio
+    binomial_results = np.random.binomial(n=1, p=probs)
+    mask = binomial_results.astype(bool)
+
+    final_result = [work for work, selecionado in zip(work_collection, mask) if selecionado]
+
+    for work in final_result:
+        if work not in available_works:
+            available_works.append(work)
 
     return available_works
 
@@ -130,3 +137,9 @@ for state in states:
     print("Trabalho atual: ", state[0])
     print("Trabalhos disponíveis: ", state[1])
     print("Pontuação acumulada: ", state[2])
+
+available_works = []
+
+for index in range(5):
+    print("Atualizando lista: ")
+    print(add_in_available_list(works, []))
