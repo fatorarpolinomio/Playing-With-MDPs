@@ -124,6 +124,26 @@ def add_in_available_list(work_collection: list, available_works: list):
 
     return available_works
 
+# Função para sortear se cada trabalho da lista sairá da lista
+# Input: lista de trabalhos disponíveis
+# Output: lista de trabalhos disponíveis atualizada
+def remove_from_available_list(available_works : list):
+
+    if not available_works:
+        return []
+
+    probs = np.array([work[4] for work in available_works], dtype=float)
+
+    # Realiza o sorteio
+    binomial_results = np.random.binomial(n=1, p=probs)
+    mask = binomial_results.astype(bool)
+
+    # O operador [:] substitui os elementos da lista original "in-place"
+    # Mantemos apenas os trabalhos onde 'remover' é False
+    available_works[:] = [work for work, remover in zip(available_works, mask) if not remover]
+
+    return available_works
+
 
 actions = [0, 1] # Negar ou aceitar um trabalho
 
@@ -139,7 +159,3 @@ for state in states:
     print("Pontuação acumulada: ", state[2])
 
 available_works = []
-
-for index in range(5):
-    print("Atualizando lista: ")
-    print(add_in_available_list(works, []))
