@@ -3,7 +3,8 @@ Jogo dos Trabalhos: interface gráfica para o LW_Environment.
 
 A interface só desenha o estado e repassa as decisões do jogador:
   - clicar em "Aceitar"      -> env.step(trabalho)
-  - clicar em "Avançar turno" -> env.step()   (nada a escolher)
+  - clicar em "Ficar ocioso"  -> env.step(trabalho nulo)   (botão fixo, quando livre)
+  - clicar em "Avançar turno" -> env.step()   (ocupado: nada a escolher)
   - piloto automático         -> env.step() com env.policy (chooseWork decide)
 Toda a dinâmica (aparecer, sumir, concluir) fica em environment.py.
 """
@@ -55,7 +56,7 @@ class LWGame(tk.Tk):
         super().__init__()
         self.title("Jogo dos Trabalhos")
         self.configure(bg=BG)
-        self.minsize(1020, 640)
+        self.minsize(1020, 700)
 
         self.n_works = tk.IntVar(value=n_works)
         self.goal = tk.IntVar(value=goal)
@@ -248,7 +249,8 @@ class LWGame(tk.Tk):
     def wait(self):
         if self.finished or self.auto.get():
             return
-        self._advance(None)
+        idle = self.env.state[0] == NULL_WORK
+        self._advance(NULL_WORK if idle else None)
 
     def _advance(self, action):
         _, r = self.env.step(action)
@@ -291,8 +293,7 @@ class LWGame(tk.Tk):
 
     @staticmethod
     def describe(work):
-        return (f"Custo {work[0]}, recompensa {work[1]}, conclui {work[2]:.0%} por turno\n"
-                f"Surge {work[3]:.0%} por turno, some {work[4]:.0%} por turno")
+        return f"Custo {work[0]}, recompensa {work[1]}, conclui {work[2]:.0%} por turno"
 
     def _build_catalog(self):
         self.tree.delete(*self.tree.get_children())
@@ -323,8 +324,8 @@ class LWGame(tk.Tk):
             self.busy_bar.grid_remove()
             self.lbl_current_title.configure(text="Ocioso")
             self.lbl_current_info.configure(
-                text="Escolha um dos trabalhos abaixo." if available
-                else "Nenhum trabalho na lista. Avance o turno e espere um surgir.")
+                text="Escolha um dos trabalhos abaixo ou fique ocioso." if available
+                else "Nenhum trabalho na lista. Fique ocioso e espere um surgir.")
         else:
             self.busy_bar.grid()
             self.busy_bar.start(30)
@@ -334,20 +335,15 @@ class LWGame(tk.Tk):
         # Trabalhos disponíveis (só aceitáveis quando ocioso)
         for child in self.avail_frame.winfo_children():
             child.destroy()
-        if available:
-            for work in available:
-                self._work_card(work, enabled=idle and manual)
-        else:
+        for work in available:
+            self._work_card(work, enabled=idle and manual)
+        if not available:
             tk.Label(self.avail_frame, text="A lista está vazia.", font=FONT_BODY,
                      bg=BG, fg=MUTED).pack(anchor="w", pady=4)
 
-        # Botão de avanço: só vale quando não há escolha obrigatória
-        if idle and not available:
-            self.btn_wait.configure(text="Esperar um trabalho")
-        else:
-            self.btn_wait.configure(text="Avançar turno")
-        can_wait = manual and (not idle or not available)
-        self.btn_wait.state(["!disabled"] if can_wait else ["disabled"])
+        # Botão fixo: livre -> escolher o ócio; ocupado -> avançar o turno
+        self.btn_wait.configure(text="Ficar ocioso" if idle else "Avançar turno")
+        self.btn_wait.state(["!disabled"] if manual else ["disabled"])
 
         # Catálogo
         for i, w in enumerate(env.works[1:], start=1):
@@ -368,12 +364,12 @@ class LWGame(tk.Tk):
 
     def _work_card(self, work, enabled):
         card = make_card(self.avail_frame)
-        card.pack(fill="x", pady=4)
+        card.pack(fill="x", pady=3)
         card.columnconfigure(0, weight=1)
         tk.Label(card, text=self.name(work), font=FONT_HEAD, bg=CARD, fg=INK,
-                 anchor="w").grid(row=0, column=0, sticky="w", padx=12, pady=(8, 0))
+                 anchor="w").grid(row=0, column=0, sticky="w", padx=12, pady=(6, 0))
         tk.Label(card, text=self.describe(work), font=FONT_SMALL, bg=CARD, fg=MUTED,
-                 justify="left", anchor="w").grid(row=1, column=0, sticky="w", padx=12, pady=(0, 8))
+                 anchor="w").grid(row=1, column=0, sticky="w", padx=12, pady=(0, 6))
         button = ttk.Button(card, text="Aceitar", style="Accent.TButton",
                             command=lambda w=work: self.accept(w))
         button.grid(row=0, column=1, rowspan=2, padx=12)
@@ -396,7 +392,9 @@ class LWGame(tk.Tk):
             self.log(prefix + "nada mudou.", "minor")
         for event in events:
             kind, work = event[0], event[1]
-            if kind == "picked":
+            if kind == "idle":
+                self.log(prefix + "ficou ocioso.", "pick")
+            elif kind == "picked":
                 self.log(prefix + f"{self.name(work)} aceito.", "pick")
             elif kind == "finished":
                 self.log(prefix + f"{self.name(work)} concluído, +{event[2]} pontos.", "gain")
