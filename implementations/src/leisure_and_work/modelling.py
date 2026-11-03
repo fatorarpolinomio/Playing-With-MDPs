@@ -144,6 +144,20 @@ def remove_from_available_list(available_works : list):
 
     return available_works
 
+def finish_work(trabalho: list):
+    # O índice 2 contém a chance geométrica de conclusão
+    prob_conclusao = trabalho[2]
+
+    # Sorteia se o trabalho foi concluído (1) ou não (0)
+    resultado_sorteio = np.random.binomial(n=1, p=prob_conclusao)
+
+    if resultado_sorteio == 1:
+        # Trabalho finalizado: retorna a lista zerada e a recompensa (índice 1)
+        return [0, 0, 0, 0], trabalho[1]
+
+    # Caso não seja concluído, o estado do trabalho se mantém e a recompensa é 0
+    return trabalho, 0
+
 
 actions = [0, 1] # Negar ou aceitar um trabalho
 
