@@ -10,7 +10,15 @@ Toda a dinâmica (aparecer, sumir, concluir) fica em environment.py.
 import tkinter as tk
 from tkinter import ttk
 
-from environment import LW_Environment, NULL_WORK, greedy_policy
+from environment import LW_Environment
+
+NULL_WORK = [0, 0, 0, 0]
+
+
+def greedy_policy(state, actions):
+    # Retorno esperado por turno: recompensa * chance de concluir (geométrica)
+    return max(actions, key=lambda work: work[1] * work[2])
+
 
 AUTO_DELAY_MS = 700
 
@@ -227,7 +235,7 @@ class LWGame(tk.Tk):
 
     @property
     def finished(self):
-        return self.env.is_goal(self.env.state)
+        return self.env.isGoal(self.env.state)
 
     # ------------------------------------------------------------------
     # Ações do jogador
