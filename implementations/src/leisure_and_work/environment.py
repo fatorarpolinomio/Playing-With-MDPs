@@ -17,6 +17,7 @@ class LW_Environment:
         self.state = self.equivalentState([0, 0, 0, 0], [], 0)
 
     def isGoal(self, state):
+        # Se a minha pontuação é maior ou igual o meu objetivo, eu cheguei no meu objetivo
         return state[2] >= self.goal[2]
 
     # Encontra em self.states o estado equivalente (a ordem dos disponíveis não importa
@@ -30,7 +31,7 @@ class LW_Environment:
         return [current_work, list(available_actions), score]
 
     # Ponto único de decisão: valida a escolha externa (GUI, agente) ou, na ausência dela,
-    # delega para self.policy (ou sorteia)
+    # delega para self.policy (ou sorteia). O trabalho nulo [0, 0, 0, 0] (ócio) é uma opção válida.
     def chooseWork(self, state : list, actions: list, choice = None):
         if not actions:
             return None
@@ -54,28 +55,35 @@ class LW_Environment:
         # Definindo forma dos trabalhos disponíveis (cópia, sem o trabalho nulo)
         available_actions = [work for work in state[1] if work != [0, 0, 0, 0]]
 
-        # Ocioso com opções: é obrigado a escolher (o trabalho sai da lista)
-        if current_work == [0, 0, 0, 0] and available_actions:
-            current_work = self.chooseWork(state, available_actions, action)
-            available_actions.remove(current_work)
-            events.append(("picked", current_work))
+        # Ocioso: é obrigado a escolher entre os trabalhos disponíveis ou o trabalho nulo (ócio)
+        picked = False
+        if current_work == [0, 0, 0, 0]:
+            options = [[0, 0, 0, 0]] + available_actions
+            current_work = self.chooseWork(state, options, action)
+            if current_work == [0, 0, 0, 0]:
+                events.append(("idle", current_work))
+            else:
+                available_actions.remove(current_work) # O trabalho aceito sai da lista
+                events.append(("picked", current_work))
+                picked = True
 
-        # Terminando (ou não) o trabalho
-        working = current_work
-        current_work, score_result = aux.finish_work(current_work)
-        score = min(score + score_result, self.max_reward)
-        if working != [0, 0, 0, 0] and current_work == [0, 0, 0, 0]:
-            events.append(("finished", working, score_result))
+        # Terminando (ou não) o trabalho (não no mesmo turno em que foi selecionado)
+        if not picked:
+            working = current_work
+            current_work, score_result = aux.finish_work(current_work)
+            score = min(score + score_result, self.max_reward)
+            if working != [0, 0, 0, 0] and current_work == [0, 0, 0, 0]:
+                events.append(("finished", working, score_result))
 
-        # Trabalho(s) aparecendo
+        # Trabalho(s) sumindo (só os que já estavam na lista no início do turno)
+        previous = list(available_actions)
+        available_actions = aux.remove_from_available_list(list(previous))
+        events += [("disappeared", work) for work in previous if work not in available_actions]
+
+        # Trabalho(s) aparecendo (os que acabaram de sumir não reaparecem no mesmo turno)
         before = list(available_actions)
-        available_actions = aux.add_in_available_list(self.works, available_actions)
+        available_actions = aux.add_in_available_list([work for work in self.works if work not in previous], available_actions)
         events += [("appeared", work) for work in available_actions if work not in before]
-
-        # Trabalho(s) sumindo
-        before = list(available_actions)
-        available_actions = aux.remove_from_available_list(available_actions)
-        events += [("disappeared", work) for work in before if work not in available_actions]
 
         self.last_events = events
 
