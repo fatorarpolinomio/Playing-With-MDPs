@@ -2,58 +2,97 @@ import modelling as aux
 import random
 
 class LW_Environment:
-    def __init__ (self, current_work : list, available_works: list, reward: int):
-        # Estado inicial: trabalho nulo, nenhum disponível, nenhuma recompensa acumulada
-        self.state = [[0, 0, 0, 0], [], 0]
+    def __init__ (self, current_work : list, available_works: list, reward: int, n_works: int = 2, max_reward: int = None):
         self.goal = [current_work, available_works, reward]
-        self.works = aux.work_collection_generator(2)
-        self.states = aux.state_collection_creator(self.works, 2)
-        self.actions = self.state[1] # As ações partem do estado atual do agente A(s)
+        self.max_reward = reward if max_reward is None else max_reward # Teto da pontuação (espaço de estados)
+        self.works = aux.work_collection_generator(n_works)
+        self.states = aux.state_collection_creator(self.works, self.max_reward)
+        self.policy = None # Opcional: função (state, actions) -> trabalho, usada por chooseWork
+        self.reset()
 
     # Volta para o estado inicial
+    # Estado inicial: trabalho nulo, nenhum disponível, nenhuma recompensa acumulada
     def reset(self):
-        self.state = [[0, 0, 0, 0], [], 0]
+        self.last_events = [] # Eventos do último passo (informativo, usado pela GUI)
+        self.state = self.equivalentState([0, 0, 0, 0], [], 0)
 
-    def chooseWork(self, state : list, actions: list):
-        pass
+    def isGoal(self, state):
+        return state[2] >= self.goal[2]
 
-    def nextState(self, state, action):
+    # Encontra em self.states o estado equivalente (a ordem dos disponíveis não importa
+    # e o trabalho nulo sempre faz parte da lista de disponíveis dos estados)
+    def equivalentState(self, current_work, available_actions, score):
+        for other_state in self.states:
+            listed = [work for work in other_state[1] if work != [0, 0, 0, 0]]
+            if current_work == other_state[0] and score == other_state[2] \
+               and len(listed) == len(available_actions) and all(work in listed for work in available_actions):
+                return [other_state[0], list(other_state[1]), other_state[2]]
+        return [current_work, list(available_actions), score]
 
-        current_work = self.state[0]
-        score = self.state[2]
+    # Ponto único de decisão: valida a escolha externa (GUI, agente) ou, na ausência dela,
+    # delega para self.policy (ou sorteia)
+    def chooseWork(self, state : list, actions: list, choice = None):
+        if not actions:
+            return None
+        if choice is None:
+            choice = self.policy(state, actions) if self.policy else random.choice(actions)
+        if choice not in actions:
+            raise ValueError("O trabalho escolhido não está disponível")
+        return choice
+
+    def nextState(self, state, action = None):
+
+        current_work = state[0]
+        score = state[2]
+        events = []
+
+        # Estado-meta é absorvente
+        if self.isGoal(state):
+            self.last_events = []
+            return [current_work, list(state[1]), score]
+
+        # Definindo forma dos trabalhos disponíveis (cópia, sem o trabalho nulo)
+        available_actions = [work for work in state[1] if work != [0, 0, 0, 0]]
+
+        # Ocioso com opções: é obrigado a escolher (o trabalho sai da lista)
+        if current_work == [0, 0, 0, 0] and available_actions:
+            current_work = self.chooseWork(state, available_actions, action)
+            available_actions.remove(current_work)
+            events.append(("picked", current_work))
 
         # Terminando (ou não) o trabalho
+        working = current_work
         current_work, score_result = aux.finish_work(current_work)
-        score = score + score_result
+        score = min(score + score_result, self.max_reward)
+        if working != [0, 0, 0, 0] and current_work == [0, 0, 0, 0]:
+            events.append(("finished", working, score_result))
 
-        # Definindo forma dos trabalhos disponíveis
-        available_actions = self.actions
         # Trabalho(s) aparecendo
+        before = list(available_actions)
         available_actions = aux.add_in_available_list(self.works, available_actions)
-        # Trabalho(s) sumindo
-        available_actions = aux.remove_from_available_list(available_actions)
+        events += [("appeared", work) for work in available_actions if work not in before]
 
-        if current_work == [0, 0, 0, 0]:
-            chooseWork()
+        # Trabalho(s) sumindo
+        before = list(available_actions)
+        available_actions = aux.remove_from_available_list(available_actions)
+        events += [("disappeared", work) for work in before if work not in available_actions]
+
+        self.last_events = events
 
         # Encontrando novo estado equivalente ao atual
-        for other_state in self.states:
-            if current_work == other_state[0] and available_actions == other_state[1] and self.state[2] == other_state[2]:
-                self.state = other_state
-
-        return self.state
+        return self.equivalentState(current_work, available_actions, score)
 
     def reward(self, state, action):
-        if state == self.goal:
+        if self.isGoal(state):
             return 0
         else:
             return -1
 
     def simulateStep(self,state,action):
         r = self.reward(state, action)
-        nextStates = self.nextState(state,action)
-        return random.choices( list( nextStates.keys() ), weights = list( nextStates.values() ), k=1 )[0], r
+        nextState = self.nextState(state,action) # nextState já devolve um único estado sorteado
+        return nextState, r
 
-    def step(self, action):
+    def step(self, action = None):
         self.state, r = self.simulateStep(self.state, action)
         return self.state, r
