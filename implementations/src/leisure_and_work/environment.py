@@ -5,8 +5,8 @@ class LW_Environment:
     def __init__ (self, current_work : list, available_works: list, reward: int, n_works: int = 2, max_reward: int = None):
         self.goal = [current_work, available_works, reward]
         self.max_reward = reward if max_reward is None else max_reward # Teto da pontuação (espaço de estados)
-        self.works = aux_funcs.work_collection_generator(n_works)
-        self.states = aux_funcs.state_collection_creator(self.works, self.max_reward)
+        self.works = aux.work_collection_generator(n_works)
+        self.states = aux.state_collection_creator(self.works, self.max_reward)
         self.policy = None # Opcional: função (state, actions) -> trabalho, usada por chooseWork
         self.reset()
 
@@ -62,19 +62,19 @@ class LW_Environment:
 
         # Terminando (ou não) o trabalho
         working = current_work
-        current_work, score_result = aux_funcs.finish_work(current_work)
+        current_work, score_result = aux.finish_work(current_work)
         score = min(score + score_result, self.max_reward)
         if working != [0, 0, 0, 0] and current_work == [0, 0, 0, 0]:
             events.append(("finished", working, score_result))
 
         # Trabalho(s) aparecendo
         before = list(available_actions)
-        available_actions = aux_funcs.add_in_available_list(self.works, available_actions)
+        available_actions = aux.add_in_available_list(self.works, available_actions)
         events += [("appeared", work) for work in available_actions if work not in before]
 
         # Trabalho(s) sumindo
         before = list(available_actions)
-        available_actions = aux_funcs.remove_from_available_list(available_actions)
+        available_actions = aux.remove_from_available_list(available_actions)
         events += [("disappeared", work) for work in before if work not in available_actions]
 
         self.last_events = events
