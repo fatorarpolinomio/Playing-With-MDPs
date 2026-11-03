@@ -157,19 +157,3 @@ def finish_work(trabalho: list):
 
     # Caso não seja concluído, o estado do trabalho se mantém e a recompensa é 0
     return trabalho, 0
-
-
-actions = [0, 1] # Negar ou aceitar um trabalho
-
-
-works = work_collection_generator(2)
-states = state_collection_creator(works, 2)
-
-print("LISTA DE ESTADOS - MÁXIMO DE PONTUAÇÃO = 2")
-for state in states:
-    print("------------")
-    print("Trabalho atual: ", state[0])
-    print("Trabalhos disponíveis: ", state[1])
-    print("Pontuação acumulada: ", state[2])
-
-available_works = []
