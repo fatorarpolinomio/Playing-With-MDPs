@@ -87,7 +87,7 @@ def work_collection_generator(work_qnt: int):
 # Função que cria um conjunto de estados com base numa lista de trabalhos pré-existente
 # Input: lista de trabalhos e o teto de recompensa
 # Output: coleção de estados baseados nos trabalhos pré-existentes
-def state_collection_creator(work_collection: list, max_reward: int):
+def state_collection_creator(work_collection: list):
 
     state_collection = []
     works_subconj = subconj_generator(work_collection)
@@ -99,9 +99,8 @@ def state_collection_creator(work_collection: list, max_reward: int):
             for work in subconj:
                 available_works.append(work)
 
-            for reward in range(max_reward + 1):
-                new_state = [current_work, available_works, reward]
-                state_collection.append(new_state)
+            new_state = [current_work, available_works]
+            state_collection.append(new_state)
 
     return state_collection
 
