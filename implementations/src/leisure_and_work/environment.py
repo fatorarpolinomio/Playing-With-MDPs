@@ -2,33 +2,27 @@ import aux_funcs as aux
 import random
 
 class LW_Environment:
-    def __init__ (self, current_work : list, available_works: list, reward: int, n_works: int = 2, max_reward: int = None):
-        self.goal = [current_work, available_works, reward]
-        self.max_reward = reward if max_reward is None else max_reward # Teto da pontuação (espaço de estados)
+    def __init__ (self, n_works: int = 2):
         self.works = aux.work_collection_generator(n_works)
-        self.states = aux.state_collection_creator(self.works, self.max_reward)
+        self.states = aux.state_collection_creator(self.works)
         self.policy = None # Opcional: função (state, actions) -> trabalho, usada por chooseWork
         self.reset()
 
     # Volta para o estado inicial
-    # Estado inicial: trabalho nulo, nenhum disponível, nenhuma recompensa acumulada
+    # Estado inicial: trabalho nulo e nenhum trabalho disponível
     def reset(self):
         self.last_events = [] # Eventos do último passo (informativo, usado pela GUI)
-        self.state = self.equivalentState([0, 0, 0, 0], [], 0)
-
-    def isGoal(self, state):
-        # Se a minha pontuação é maior ou igual o meu objetivo, eu cheguei no meu objetivo
-        return state[2] >= self.goal[2]
+        self.state = self.equivalentState([0, 0, 0, 0], [])
 
     # Encontra em self.states o estado equivalente (a ordem dos disponíveis não importa
     # e o trabalho nulo sempre faz parte da lista de disponíveis dos estados)
-    def equivalentState(self, current_work, available_actions, score):
+    def equivalentState(self, current_work, available_actions):
         for other_state in self.states:
             listed = [work for work in other_state[1] if work != [0, 0, 0, 0]]
-            if current_work == other_state[0] and score == other_state[2] \
+            if current_work == other_state[0] \
                and len(listed) == len(available_actions) and all(work in listed for work in available_actions):
-                return [other_state[0], list(other_state[1]), other_state[2]]
-        return [current_work, list(available_actions), score]
+                return [other_state[0], list(other_state[1])]
+        return [current_work, list(available_actions)]
 
     # Ponto único de decisão: valida a escolha externa (GUI, agente) ou, na ausência dela,
     # delega para self.policy (ou sorteia). O trabalho nulo [0, 0, 0, 0] (ócio) é uma opção válida.
@@ -44,13 +38,7 @@ class LW_Environment:
     def nextState(self, state, action = None):
 
         current_work = state[0]
-        score = state[2]
         events = []
-
-        # Estado-meta é absorvente
-        if self.isGoal(state):
-            self.last_events = []
-            return [current_work, list(state[1]), score]
 
         # Definindo forma dos trabalhos disponíveis (cópia, sem o trabalho nulo)
         available_actions = [work for work in state[1] if work != [0, 0, 0, 0]]
@@ -71,7 +59,6 @@ class LW_Environment:
         if not picked:
             working = current_work
             current_work, score_result = aux.finish_work(current_work)
-            score = min(score + score_result, self.max_reward)
             if working != [0, 0, 0, 0] and current_work == [0, 0, 0, 0]:
                 events.append(("finished", working, score_result))
 
@@ -88,17 +75,17 @@ class LW_Environment:
         self.last_events = events
 
         # Encontrando novo estado equivalente ao atual
-        return self.equivalentState(current_work, available_actions, score)
+        return self.equivalentState(current_work, available_actions)
 
-    def reward(self, state, action):
-        if self.isGoal(state):
-            return 0
-        else:
-            return -1
+    # R(s, a, s'): a recompensa do trabalho é paga só no turno em que ele é concluído
+    def reward(self, state, action, next_state):
+        if state[0] != [0, 0, 0, 0] and next_state[0] == [0, 0, 0, 0]:
+            return state[0][1]
+        return 0
 
     def simulateStep(self,state,action):
-        r = self.reward(state, action)
         nextState = self.nextState(state,action) # nextState já devolve um único estado sorteado
+        r = self.reward(state, action, nextState)
         return nextState, r
 
     def step(self, action = None):
