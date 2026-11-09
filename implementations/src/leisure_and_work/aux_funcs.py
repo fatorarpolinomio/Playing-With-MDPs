@@ -1,4 +1,8 @@
-import mdp_algorithms as mdp
+try:
+    import mdp_algorithms as mdp  # não é usado neste módulo
+except ImportError:
+    mdp = None
+
 import numpy as np
 import itertools
 
@@ -38,7 +42,6 @@ def subconj_generator(lista):
 # Output: lista preenchida com a quantidade de trabalhos requerida
 def work_collection_generator(work_qnt: int):
     rng = np.random.default_rng()
-    count = work_qnt
     work_collection = [[0, 0, 0, 0]] # Inicializando com o trabalho nulo
     prob_finish_list = [] # Lista de chances de finalizar cada trabalho
     prob_showup_list = [] # Lista de chances dos trabalhos aparecerem
@@ -85,7 +88,7 @@ def work_collection_generator(work_qnt: int):
     return work_collection
 
 # Função que cria um conjunto de estados com base numa lista de trabalhos pré-existente
-# Input: lista de trabalhos e o teto de recompensa
+# Input: lista de trabalhos
 # Output: coleção de estados baseados nos trabalhos pré-existentes
 def state_collection_creator(work_collection: list):
 
