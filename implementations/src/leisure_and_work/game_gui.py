@@ -7,9 +7,11 @@ A interface só desenha o estado e repassa as decisões do jogador:
   - clicar em "Avançar turno" -> env.step()   (ocupado: nada a escolher)
   - piloto automático         -> env.step() com env.policy (chooseWork decide)
 Toda a dinâmica (aparecer, sumir, concluir) fica em environment.py.
-O jogo não tem condição de parada: continua até o jogador fechar a janela.
+O jogo não tem condição de parada: o jogador encerra a partida quando quiser
+(botão "Encerrar partida"), e um resumo é exibido.
 O placar é a recompensa acumulada formal do MDP: a soma dos `r` devolvidos por env.step.
 """
+from collections import Counter
 import tkinter as tk
 from tkinter import ttk
 
@@ -64,6 +66,8 @@ class LWGame(tk.Tk):
         self.n_works = tk.IntVar(value=n_works)
         self.auto = tk.BooleanVar(value=False)
         self._after_id = None
+        self._summary_win = None
+        self.ended = False
         self.turn = 0
         self.total_reward = 0  # recompensa acumulada (soma dos r devolvidos por env.step)
 
@@ -134,13 +138,19 @@ class LWGame(tk.Tk):
         self.avail_frame = tk.Frame(main, bg=BG)
         self.avail_frame.grid(row=3, column=0, sticky="nsew", pady=(4, 8))
 
+        self.lbl_banner = tk.Label(main, font=FONT_BODY, bg=BG, fg=ACCENT, anchor="w")
+        self.lbl_banner.grid(row=4, column=0, sticky="ew", pady=(0, 6))
+
         controls = tk.Frame(main, bg=BG)
         controls.grid(row=5, column=0, sticky="ew")
         self.btn_wait = ttk.Button(controls, command=self.wait)
         self.btn_wait.pack(side="left")
-        ttk.Checkbutton(controls, text="Piloto automático", variable=self.auto,
-                        command=self._toggle_auto).pack(side="left", padx=16)
-        ttk.Button(controls, text="Reiniciar partida", command=self.restart).pack(side="right")
+        self.chk_auto = ttk.Checkbutton(controls, text="Piloto automático", variable=self.auto,
+                                        command=self._toggle_auto)
+        self.chk_auto.pack(side="left", padx=16)
+        ttk.Button(controls, text="Reiniciar", command=self.restart).pack(side="right")
+        self.btn_end = ttk.Button(controls, text="Encerrar partida", command=self._end_or_summary)
+        self.btn_end.pack(side="right", padx=(0, 8))
 
         # Coluna lateral: catálogo, registro e nova partida
         side = tk.Frame(self, bg=BG)
@@ -205,8 +215,15 @@ class LWGame(tk.Tk):
         self.refresh()
 
     def _reset_counters(self):
+        self._close_summary()
+        self.ended = False
         self.turn = 0
         self.total_reward = 0
+        self.busy_turns = 0         # turnos que começaram com o agente trabalhando
+        self.idle_turns = 0         # turnos em que o agente escolheu o ócio
+        self.accepted = Counter()   # trabalho -> vezes aceito
+        self.completed = Counter()  # trabalho -> vezes concluído
+        self.earned = Counter()     # trabalho -> recompensa obtida
         self.log_text.configure(state="normal")
         self.log_text.delete("1.0", "end")
         self.log_text.configure(state="disabled")
@@ -221,26 +238,55 @@ class LWGame(tk.Tk):
         self._stop_auto()
         self.destroy()
 
+    def _end_or_summary(self):
+        if self.ended:
+            self._show_summary()
+        else:
+            self.end_game()
+
+    def end_game(self):
+        if self.ended:
+            return
+        self._stop_auto()
+        self.ended = True
+        self.log(f"Partida encerrada no turno {self.turn}.", "minor")
+        self.refresh()
+        self._show_summary()
+
     # ------------------------------------------------------------------
     # Ações do jogador
     # ------------------------------------------------------------------
     def accept(self, work):
-        if self.auto.get():
+        if self.auto.get() or self.ended:
             return
         self._advance(work)
 
     def wait(self):
-        if self.auto.get():
+        if self.auto.get() or self.ended:
             return
         idle = self.env.state[0] == NULL_WORK
         self._advance(NULL_WORK if idle else None)
 
     def _advance(self, action):
+        was_busy = self.env.state[0] != NULL_WORK
         _, r = self.env.step(action)
         self.turn += 1
         self.total_reward += r
+        self.busy_turns += was_busy
+        self._record_stats()
         self._log_events()
         self.refresh()
+
+    def _record_stats(self):
+        for event in self.env.last_events:
+            kind = event[0]
+            if kind == "idle":
+                self.idle_turns += 1
+            elif kind == "picked":
+                self.accepted[self.name(event[1])] += 1
+            elif kind == "finished":
+                self.completed[self.name(event[1])] += 1
+                self.earned[self.name(event[1])] += event[2]
 
     def _toggle_auto(self):
         if self.auto.get():
@@ -255,7 +301,7 @@ class LWGame(tk.Tk):
 
     def _auto_step(self):
         self._after_id = None
-        if not self.auto.get():
+        if not self.auto.get() or self.ended:
             return
         self._advance(None)  # chooseWork delega para env.policy
         if self.auto.get():
@@ -287,7 +333,7 @@ class LWGame(tk.Tk):
         current, listed = env.state[0], env.state[1]
         idle = current == NULL_WORK
         available = [w for w in listed if w != NULL_WORK]
-        manual = not self.auto.get()
+        manual = not self.auto.get() and not self.ended
 
         average = self.total_reward / self.turn if self.turn else 0
         self.lbl_stats.configure(text=f"Turno {self.turn}     Média por turno {average:.2f}")
@@ -323,6 +369,11 @@ class LWGame(tk.Tk):
         # Botão fixo: livre -> escolher o ócio; ocupado -> avançar o turno
         self.btn_wait.configure(text="Ficar ocioso" if idle else "Avançar turno")
         self.btn_wait.state(["!disabled"] if manual else ["disabled"])
+        self.btn_end.configure(text="Ver resumo" if self.ended else "Encerrar partida")
+        self.chk_auto.state(["disabled"] if self.ended else ["!disabled"])
+        self.lbl_banner.configure(
+            text="Partida encerrada. Use Reiniciar ou Nova partida para jogar de novo."
+            if self.ended else "")
 
         # Catálogo
         for i, w in enumerate(env.works[1:], start=1):
@@ -347,6 +398,74 @@ class LWGame(tk.Tk):
         button.grid(row=0, column=1, rowspan=2, padx=12)
         if not enabled:
             button.state(["disabled"])
+
+    # ------------------------------------------------------------------
+    # Resumo da partida
+    # ------------------------------------------------------------------
+    def _close_summary(self):
+        if self._summary_win is not None:
+            try:
+                self._summary_win.destroy()
+            except tk.TclError:
+                pass
+            self._summary_win = None
+
+    def _show_summary(self):
+        self._close_summary()
+        win = tk.Toplevel(self)
+        self._summary_win = win
+        win.title("Resumo da partida")
+        win.configure(bg=BG)
+        win.transient(self)
+        win.resizable(False, False)
+
+        card = make_card(win)
+        card.pack(fill="both", padx=18, pady=(18, 10))
+        tk.Label(card, text="Partida encerrada", font=FONT_TITLE, bg=CARD, fg=INK).grid(
+            row=0, column=0, columnspan=4, sticky="w", padx=16, pady=(14, 0))
+        tk.Label(card, text=f"Recompensa acumulada {self.total_reward}", font=FONT_HEAD,
+                 bg=CARD, fg=ACCENT).grid(row=1, column=0, columnspan=4, sticky="w", padx=16)
+
+        turns = self.turn
+        average = self.total_reward / turns if turns else 0
+        idle_share = self.idle_turns / turns if turns else 0
+        summary = [("Turnos jogados", f"{turns}"),
+                   ("Recompensa média por turno", f"{average:.2f}"),
+                   ("Trabalhos aceitos", f"{sum(self.accepted.values())}"),
+                   ("Trabalhos concluídos", f"{sum(self.completed.values())}"),
+                   ("Turnos em que ficou ocioso", f"{self.idle_turns} ({idle_share:.0%})")]
+        for i, (label, value) in enumerate(summary, start=2):
+            tk.Label(card, text=label, font=FONT_BODY, bg=CARD, fg=MUTED, anchor="w").grid(
+                row=i, column=0, columnspan=2, sticky="w", padx=(16, 24), pady=1)
+            tk.Label(card, text=value, font=("Helvetica", 11, "bold"), bg=CARD, fg=INK,
+                     anchor="e").grid(row=i, column=2, columnspan=2, sticky="e", padx=(0, 16), pady=1)
+
+        base = 2 + len(summary) + 1
+        for col, title in enumerate(("Por trabalho", "Aceitos", "Concluídos", "Recompensa")):
+            tk.Label(card, text=title, font=("Helvetica", 10, "bold"), bg=CARD, fg=INK,
+                     anchor="w" if col == 0 else "e").grid(
+                row=base, column=col, sticky="ew", padx=(16 if col == 0 else 8, 16 if col == 3 else 8),
+                pady=(10, 2))
+        for i, work in enumerate(self.env.works[1:], start=1):
+            name = self.name(work)
+            values = (name, self.accepted[name], self.completed[name], self.earned[name])
+            for col, value in enumerate(values):
+                tk.Label(card, text=str(value), font=FONT_SMALL, bg=CARD, fg=INK,
+                         anchor="w" if col == 0 else "e").grid(
+                    row=base + i, column=col, sticky="ew",
+                    padx=(16 if col == 0 else 8, 16 if col == 3 else 8), pady=1)
+        tk.Frame(card, bg=CARD, height=10).grid(row=base + len(self.env.works), column=0)
+
+        buttons = tk.Frame(win, bg=BG)
+        buttons.pack(fill="x", padx=18, pady=(0, 16))
+        ttk.Button(buttons, text="Nova partida", style="Accent.TButton",
+                   command=self.new_game).pack(side="left")
+        ttk.Button(buttons, text="Fechar", command=self._close_summary).pack(side="right")
+
+        win.update_idletasks()
+        x = self.winfo_rootx() + (self.winfo_width() - win.winfo_reqwidth()) // 2
+        y = self.winfo_rooty() + (self.winfo_height() - win.winfo_reqheight()) // 3
+        win.geometry(f"+{max(x, 0)}+{max(y, 0)}")
 
     # ------------------------------------------------------------------
     # Registro de eventos
