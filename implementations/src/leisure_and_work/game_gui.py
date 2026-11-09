@@ -7,6 +7,8 @@ A interface só desenha o estado e repassa as decisões do jogador:
   - clicar em "Avançar turno" -> env.step()   (ocupado: nada a escolher)
   - piloto automático         -> env.step() com env.policy (chooseWork decide)
 Toda a dinâmica (aparecer, sumir, concluir) fica em environment.py.
+O jogo não tem condição de parada: continua até o jogador fechar a janela.
+O placar é a recompensa acumulada formal do MDP: a soma dos `r` devolvidos por env.step.
 """
 import tkinter as tk
 from tkinter import ttk
@@ -22,6 +24,7 @@ def greedy_policy(state, actions):
 
 
 AUTO_DELAY_MS = 700
+LOG_MAX_LINES = 500  # o jogo não termina: limita o histórico exibido
 
 # Paleta: quadro de despacho em tons de sálvia, tinta esverdeada e marca-texto amarelo
 BG = "#DCE4DF"
@@ -52,18 +55,17 @@ def read_int(var, low, high, default):
 
 
 class LWGame(tk.Tk):
-    def __init__(self, n_works=3, goal=10):
+    def __init__(self, n_works=3):
         super().__init__()
         self.title("Jogo dos Trabalhos")
         self.configure(bg=BG)
         self.minsize(1020, 700)
 
         self.n_works = tk.IntVar(value=n_works)
-        self.goal = tk.IntVar(value=goal)
         self.auto = tk.BooleanVar(value=False)
         self._after_id = None
         self.turn = 0
-        self.total_reward = 0
+        self.total_reward = 0  # recompensa acumulada (soma dos r devolvidos por env.step)
 
         self._setup_style()
         self._build_ui()
@@ -82,8 +84,6 @@ class LWGame(tk.Tk):
         style.map("Accent.TButton",
                   background=[("disabled", BORDER), ("active", "#0B5547")],
                   foreground=[("disabled", "#F2F5F3")])
-        style.configure("Score.Horizontal.TProgressbar", troughcolor=CARD,
-                        background=ACCENT, bordercolor=BORDER, thickness=16)
         style.configure("Busy.Horizontal.TProgressbar", troughcolor="#F3E6B8",
                         background=INK, bordercolor="#E0C766", thickness=6)
         style.configure("Treeview", font=FONT_SMALL, rowheight=24,
@@ -106,13 +106,8 @@ class LWGame(tk.Tk):
         self.lbl_stats = tk.Label(top, font=FONT_BODY, bg=BG, fg=MUTED)
         self.lbl_stats.grid(row=0, column=1, sticky="e")
 
-        score_row = tk.Frame(top, bg=BG)
-        score_row.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
-        self.lbl_score = tk.Label(score_row, font=FONT_HEAD, bg=BG, fg=INK, width=16, anchor="w")
-        self.lbl_score.pack(side="left")
-        self.progress = ttk.Progressbar(score_row, style="Score.Horizontal.TProgressbar",
-                                        mode="determinate")
-        self.progress.pack(side="left", fill="x", expand=True)
+        self.lbl_score = tk.Label(top, font=FONT_TITLE, bg=BG, fg=ACCENT, anchor="w")
+        self.lbl_score.grid(row=1, column=0, columnspan=2, sticky="w", pady=(4, 0))
 
         # Coluna principal: trabalho atual, disponíveis e controles
         main = tk.Frame(self, bg=BG)
@@ -138,9 +133,6 @@ class LWGame(tk.Tk):
             row=2, column=0, sticky="w")
         self.avail_frame = tk.Frame(main, bg=BG)
         self.avail_frame.grid(row=3, column=0, sticky="nsew", pady=(4, 8))
-
-        self.lbl_banner = tk.Label(main, font=FONT_HEAD, bg=BG, fg=DONE, anchor="w")
-        self.lbl_banner.grid(row=4, column=0, sticky="ew", pady=(0, 6))
 
         controls = tk.Frame(main, bg=BG)
         controls.grid(row=5, column=0, sticky="ew")
@@ -189,9 +181,6 @@ class LWGame(tk.Tk):
         tk.Label(setup, text="Trabalhos", font=FONT_SMALL, bg=BG, fg=INK).pack(side="left")
         ttk.Spinbox(setup, from_=2, to=5, width=3, textvariable=self.n_works).pack(
             side="left", padx=(6, 14))
-        tk.Label(setup, text="Meta de pontos", font=FONT_SMALL, bg=BG, fg=INK).pack(side="left")
-        ttk.Spinbox(setup, from_=1, to=20, width=3, textvariable=self.goal).pack(
-            side="left", padx=(6, 14))
         ttk.Button(setup, text="Nova partida", command=self.new_game).pack(side="right")
 
     # ------------------------------------------------------------------
@@ -200,14 +189,12 @@ class LWGame(tk.Tk):
     def new_game(self):
         self._stop_auto()
         n = read_int(self.n_works, 2, 5, 3)
-        goal = read_int(self.goal, 1, 20, 10)
         self.n_works.set(n)
-        self.goal.set(goal)
-        self.env = LW_Environment(list(NULL_WORK), [], goal, n_works=n)
+        self.env = LW_Environment(n_works=n)
         self.env.policy = greedy_policy  # só é usada no piloto automático
         self._build_catalog()
         self._reset_counters()
-        self.log(f"Nova partida: {n} trabalhos, meta de {goal} pontos.", "minor")
+        self.log(f"Nova partida com {n} trabalhos. O jogo não tem fim.", "minor")
         self.refresh()
 
     def restart(self):
@@ -234,20 +221,16 @@ class LWGame(tk.Tk):
         self._stop_auto()
         self.destroy()
 
-    @property
-    def finished(self):
-        return self.env.isGoal(self.env.state)
-
     # ------------------------------------------------------------------
     # Ações do jogador
     # ------------------------------------------------------------------
     def accept(self, work):
-        if self.finished or self.auto.get():
+        if self.auto.get():
             return
         self._advance(work)
 
     def wait(self):
-        if self.finished or self.auto.get():
+        if self.auto.get():
             return
         idle = self.env.state[0] == NULL_WORK
         self._advance(NULL_WORK if idle else None)
@@ -260,9 +243,7 @@ class LWGame(tk.Tk):
         self.refresh()
 
     def _toggle_auto(self):
-        if self.auto.get() and self.finished:
-            self.auto.set(False)
-        elif self.auto.get():
+        if self.auto.get():
             self._schedule_auto()
         elif self._after_id is not None:
             self.after_cancel(self._after_id)
@@ -274,10 +255,10 @@ class LWGame(tk.Tk):
 
     def _auto_step(self):
         self._after_id = None
-        if not self.auto.get() or self.finished:
+        if not self.auto.get():
             return
         self._advance(None)  # chooseWork delega para env.policy
-        if self.auto.get() and not self.finished:
+        if self.auto.get():
             self._schedule_auto()
 
     # ------------------------------------------------------------------
@@ -303,16 +284,14 @@ class LWGame(tk.Tk):
 
     def refresh(self):
         env = self.env
-        current, listed, score = env.state
-        goal = env.goal[2]
+        current, listed = env.state[0], env.state[1]
         idle = current == NULL_WORK
         available = [w for w in listed if w != NULL_WORK]
-        finished = self.finished
-        manual = not finished and not self.auto.get()
+        manual = not self.auto.get()
 
-        self.lbl_stats.configure(text=f"Turno {self.turn}     Retorno acumulado {self.total_reward}")
-        self.lbl_score.configure(text=f"Pontos {score} de {goal}")
-        self.progress.configure(maximum=goal, value=score)
+        average = self.total_reward / self.turn if self.turn else 0
+        self.lbl_stats.configure(text=f"Turno {self.turn}     Média por turno {average:.2f}")
+        self.lbl_score.configure(text=f"Recompensa acumulada {self.total_reward}")
 
         # Trabalho atual
         color = CARD if idle else BUSY
@@ -355,13 +334,6 @@ class LWGame(tk.Tk):
                 status = "-"
             self.tree.set(str(i), "status", status)
 
-        if finished:
-            self._stop_auto()
-            self.lbl_banner.configure(
-                text=f"Meta atingida em {self.turn} turnos. Retorno acumulado: {self.total_reward}.")
-        else:
-            self.lbl_banner.configure(text="")
-
     def _work_card(self, work, enabled):
         card = make_card(self.avail_frame)
         card.pack(fill="x", pady=3)
@@ -382,6 +354,8 @@ class LWGame(tk.Tk):
     def log(self, text, tag=None):
         self.log_text.configure(state="normal")
         self.log_text.insert("end", text + "\n", tag)
+        if int(self.log_text.index("end-1c").split(".")[0]) > LOG_MAX_LINES:
+            self.log_text.delete("1.0", "2.0")  # descarta a linha mais antiga
         self.log_text.see("end")
         self.log_text.configure(state="disabled")
 
@@ -397,7 +371,7 @@ class LWGame(tk.Tk):
             elif kind == "picked":
                 self.log(prefix + f"{self.name(work)} aceito.", "pick")
             elif kind == "finished":
-                self.log(prefix + f"{self.name(work)} concluído, +{event[2]} pontos.", "gain")
+                self.log(prefix + f"{self.name(work)} concluído, recompensa +{event[2]}.", "gain")
             elif kind == "appeared":
                 self.log(prefix + f"{self.name(work)} entrou na lista.", "minor")
             elif kind == "disappeared":
