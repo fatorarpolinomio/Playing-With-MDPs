@@ -91,3 +91,33 @@ class LW_Environment:
     def step(self, action = None):
         self.state, r = self.simulateStep(self.state, action)
         return self.state, r
+
+
+
+
+
+
+# Pr(S(t+1) = s'| S(t) = s, A(t) = a)
+def transfunc_LW(
+    target_state : list,
+    start_state : list,
+    action : list):
+
+    current_state = start_state
+    # Se o meu trabalho é o trabalho nulo (i.e., caso eu esteja ocioso)
+    # E a ação escolhida estiver na lista de disponíveis
+    if (current_state[0] == [0, 0, 0, 0]) and action in current_state[1]:
+
+            # Se estiver na lista, então será selecionada
+            current_state[0] = action
+
+             # Se a ação não for o nulo, remova ela da lista
+            if action != [0, 0, 0, 0]:
+                current_state[1].remove(action)
+
+    # Se o trabalho que o agente irá realizar no próximo turno não for o trabalho sendo realizado no
+    # estado-alvo, não existe chance de transitar para lá
+    if current_state[0] != target_state[0]:
+        return 0
+
+        # Computar probabilidades
