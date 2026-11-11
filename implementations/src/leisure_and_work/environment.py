@@ -101,6 +101,7 @@ class LW_Environment:
 def transfunc_LW(
     target_state : list,
     start_state : list,
+    state_list: list,
     action : list):
 
     current_state = start_state
@@ -120,4 +121,32 @@ def transfunc_LW(
     if current_state[0] != target_state[0]:
         return 0
 
-        # Computar probabilidades
+    # Computar probabilidades
+    prob = 1
+    not_show_up_works = state_list # Será transformada na lista de trabalhos que não podem estar disponíveis
+
+    for work in target_state[1]:
+
+        # Transformando na lista de trabalhos que não podem estar disponíveis
+        not_show_up_works.remove(work)
+
+        # Caso o trabalho esteja na lista de disponíveis, qual a chance dele não sumir?
+        # (queremos que ele não suma)
+        if work in current_state[1]:
+            prob = prob * (1 - work[4])
+        # Caso o trabalho não esteja, qual a chance dele aparecer?
+        # (queremos que ele apareça)
+        else:
+            prob = prob * work[3]
+
+    for work in not_show_up_works:
+        # Caso o trabalho esteja na lista de disponíveis, qual a chance dele sumir?
+        # (queremos que ele suma)
+        if work in current_state[1]:
+            prob = prob * work[4]
+        # Caso o trabalho não esteja, qual a chance dele não aparecer?
+        # (querems que le não apareça)
+        else:
+            prob = prob * (1 - work[3])
+
+    return prob
