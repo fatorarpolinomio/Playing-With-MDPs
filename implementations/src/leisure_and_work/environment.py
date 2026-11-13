@@ -102,33 +102,36 @@ def transfunc_LW(
     target_state : list,
     start_state : list,
     state_list: list,
+    work_list: list,
     action : list):
 
+    # Se o trabalho que o agente está realizando não for o trabalho sendo realizado no
+    # estado-alvo e o trabalho não estiver na lista de disponíveis, ele terá que
+    # esperar o trabalho aparecer para escolher. Então, não poderá transitar para o estado-alvo
+    if start_state[0] != target_state[0] and target_state[0] not in start_state[1]:
+        return 0;
+
     current_state = start_state
+
     # Se o meu trabalho é o trabalho nulo (i.e., caso eu esteja ocioso)
     # E a ação escolhida estiver na lista de disponíveis
-    if (current_state[0] == [0, 0, 0, 0]) and action in current_state[1]:
+    if (current_state[0] == [0, 0, 0, 0, 0]) and (action in current_state[1]):
 
-            # Se estiver na lista, então será selecionada
+            # Então, a ação será selecionada
             current_state[0] = action
 
              # Se a ação não for o nulo, remova ela da lista
-            if action != [0, 0, 0, 0]:
+            if action != [0, 0, 0, 0, 0]:
                 current_state[1].remove(action)
-
-    # Se o trabalho que o agente irá realizar no próximo turno não for o trabalho sendo realizado no
-    # estado-alvo, não existe chance de transitar para lá
-    if current_state[0] != target_state[0]:
-        return 0
 
     # Computar probabilidades
     prob = 1
-    not_show_up_works = state_list # Será transformada na lista de trabalhos que não podem estar disponíveis
+    not_show_up_works = work_list # Será transformada na lista de trabalhos que não podem estar disponíveis
 
     for work in target_state[1]:
-
         # Transformando na lista de trabalhos que não podem estar disponíveis
-        not_show_up_works.remove(work)
+        if work in not_show_up_works:
+            not_show_up_works.remove(work)
 
         # Caso o trabalho esteja na lista de disponíveis, qual a chance dele não sumir?
         # (queremos que ele não suma)
@@ -145,8 +148,63 @@ def transfunc_LW(
         if work in current_state[1]:
             prob = prob * work[4]
         # Caso o trabalho não esteja, qual a chance dele não aparecer?
-        # (querems que le não apareça)
+        # (queremos que ele não apareça)
         else:
             prob = prob * (1 - work[3])
 
     return prob
+
+def transfunc_LW2(
+    target_state : list,
+    start_state : list,
+    work_list: list,
+    action : list):
+
+        # Se o trabalho sendo realizado no estado-alvo for diferente daquele em estado de partida
+        # e o trabalho não estiver na lista de disponíveis no estado de partida, ele não pode transitar para lá
+        if (start_state[0] != target_state[0]) and (target_state[0] not in start_state[1]):
+           return 0
+
+        # Se o agente estiver ocioso, a ação escolhida estiver na sua lista e a ação escolhida não for o trabalho
+        # sendo realizado no estado-alvo, ele não pode transitar para lá
+        if (start_state[0] == [0, 0, 0, 0, 0]) and (action in start_state[1]) and (action != target_state[0]):
+           return 0
+
+        prob = 1
+        current_state = start_state
+
+        print("Chegou na parte das probs")
+        # Caso o agente esteja ocioso e a ação esteja disponível, ele deve pegá-la:
+        if (current_state[0] == [0, 0, 0, 0, 0]) and (action in current_state[1]):
+            current_state[0] = action
+
+            if action != [0, 0, 0, 0, 0]:
+                current_state[1].remove(action)
+
+        # Se o estado-alvo tiver como nulo o trabalho sendo realizado e
+        # o agente não estiver ocioso no estado de partida,
+        # a probabilidade de terminar o trabalho atual deve ser levada em consideração
+        if (target_state[0] == [0, 0, 0, 0, 0]) and (start_state[0] != [0, 0, 0, 0, 0]):
+            print("Entrou no primeiro if")
+            prob = prob * start_state[0][2]
+
+        # Se os trabalhos sendo realizados no estado-alvo e no de partida
+        # forem iguais, a probabilidade de não terminar deve ser levada em consideração
+        if (target_state[0] == start_state[0]):
+            print("Entrou no segundo if")
+            prob = prob * (1 - start_state[0][2])
+
+        for work in work_list:
+            # Considerando que um trabalho está na disponível no estado-alvo
+            if (work in target_state[1]) and (work not in start_state[1]):
+                prob = prob * work[3] # Multiplica a chance dele aparecer
+            if (work in target_state[1]) and (work in start_state[1]):
+                prob = prob * (1 - work[4]) # Multiplica a chance dele não sumir
+
+            # Considerando que não está disponível no estado-alvo
+            if (work not in target_state[1]) and (work not in start_state[1]):
+                prob = prob * (1 - work[3]) # Multiplica a chance dele não aparecer
+            if (work not in target_state[1]) and (work in start_state[1]):
+                prob = prob * work[4] # Multiplica a chance dele sumir
+
+        return prob
