@@ -31,5 +31,3 @@ def log_test(actions: list, states: list, works : list):
 
 actions, states, works = one_work_test()
 log_test(actions, states, works)
-result = environment.transfunc_LW2(states[1], states[2], works, actions[1])
-print("resultado: ", result)
