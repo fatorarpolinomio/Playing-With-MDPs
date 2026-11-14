@@ -101,62 +101,6 @@ class LW_Environment:
 def transfunc_LW(
     target_state : list,
     start_state : list,
-    state_list: list,
-    work_list: list,
-    action : list):
-
-    # Se o trabalho que o agente está realizando não for o trabalho sendo realizado no
-    # estado-alvo e o trabalho não estiver na lista de disponíveis, ele terá que
-    # esperar o trabalho aparecer para escolher. Então, não poderá transitar para o estado-alvo
-    if start_state[0] != target_state[0] and target_state[0] not in start_state[1]:
-        return 0;
-
-    current_state = start_state
-
-    # Se o meu trabalho é o trabalho nulo (i.e., caso eu esteja ocioso)
-    # E a ação escolhida estiver na lista de disponíveis
-    if (current_state[0] == [0, 0, 0, 0, 0]) and (action in current_state[1]):
-
-            # Então, a ação será selecionada
-            current_state[0] = action
-
-             # Se a ação não for o nulo, remova ela da lista
-            if action != [0, 0, 0, 0, 0]:
-                current_state[1].remove(action)
-
-    # Computar probabilidades
-    prob = 1
-    not_show_up_works = work_list # Será transformada na lista de trabalhos que não podem estar disponíveis
-
-    for work in target_state[1]:
-        # Transformando na lista de trabalhos que não podem estar disponíveis
-        if work in not_show_up_works:
-            not_show_up_works.remove(work)
-
-        # Caso o trabalho esteja na lista de disponíveis, qual a chance dele não sumir?
-        # (queremos que ele não suma)
-        if work in current_state[1]:
-            prob = prob * (1 - work[4])
-        # Caso o trabalho não esteja, qual a chance dele aparecer?
-        # (queremos que ele apareça)
-        else:
-            prob = prob * work[3]
-
-    for work in not_show_up_works:
-        # Caso o trabalho esteja na lista de disponíveis, qual a chance dele sumir?
-        # (queremos que ele suma)
-        if work in current_state[1]:
-            prob = prob * work[4]
-        # Caso o trabalho não esteja, qual a chance dele não aparecer?
-        # (queremos que ele não apareça)
-        else:
-            prob = prob * (1 - work[3])
-
-    return prob
-
-def transfunc_LW2(
-    target_state : list,
-    start_state : list,
     work_list: list,
     action : list):
 
@@ -171,13 +115,11 @@ def transfunc_LW2(
            return 0
 
         prob = 1
-        current_state = start_state
+        current_state = list(start_state)
 
-        print("Chegou na parte das probs")
         # Caso o agente esteja ocioso e a ação esteja disponível, ele deve pegá-la:
         if (current_state[0] == [0, 0, 0, 0, 0]) and (action in current_state[1]):
             current_state[0] = action
-
             if action != [0, 0, 0, 0, 0]:
                 current_state[1].remove(action)
 
@@ -185,13 +127,11 @@ def transfunc_LW2(
         # o agente não estiver ocioso no estado de partida,
         # a probabilidade de terminar o trabalho atual deve ser levada em consideração
         if (target_state[0] == [0, 0, 0, 0, 0]) and (start_state[0] != [0, 0, 0, 0, 0]):
-            print("Entrou no primeiro if")
             prob = prob * start_state[0][2]
 
         # Se os trabalhos sendo realizados no estado-alvo e no de partida
         # forem iguais, a probabilidade de não terminar deve ser levada em consideração
         if (target_state[0] == start_state[0]):
-            print("Entrou no segundo if")
             prob = prob * (1 - start_state[0][2])
 
         for work in work_list:
@@ -200,11 +140,58 @@ def transfunc_LW2(
                 prob = prob * work[3] # Multiplica a chance dele aparecer
             if (work in target_state[1]) and (work in start_state[1]):
                 prob = prob * (1 - work[4]) # Multiplica a chance dele não sumir
-
             # Considerando que não está disponível no estado-alvo
             if (work not in target_state[1]) and (work not in start_state[1]):
                 prob = prob * (1 - work[3]) # Multiplica a chance dele não aparecer
             if (work not in target_state[1]) and (work in start_state[1]):
                 prob = prob * work[4] # Multiplica a chance dele sumir
+
+        return prob
+
+def transfunc_LW2(
+    target_state : list,
+    start_state : list,
+    work_list: list,
+    action : list):
+
+        null = [0, 0, 0, 0, 0]
+        start_work = start_state[0]
+        start_list = list(start_state[1])   # cópia: a função não altera o estado de partida
+        idle = (start_work == null)
+
+        if idle:
+            # Ação indisponível na lista: o agente fica ocioso (equivale a escolher o trabalho nulo)
+            if action not in start_list:
+                action = null
+            # O alvo só pode ser o trabalho escolhido (ou o nulo, se a ação for o ócio)
+            if target_state[0] != action:
+                return 0
+            # O trabalho aceito sai da lista antes dos sorteios de aparecer/sumir
+            if action != null:
+                start_list.remove(action)
+        else:
+            # Ocupado: só pode continuar no mesmo trabalho ou concluí-lo (virar nulo)
+            if (target_state[0] != start_work) and (target_state[0] != null):
+                return 0
+
+        prob = 1
+
+        # Concluir / não concluir: só vale para quem já estava trabalhando no início do turno
+        # (quem acabou de escolher não tem sorteio de conclusão neste turno)
+        if not idle:
+            if target_state[0] == null:
+                prob = prob * start_work[2]
+            else:
+                prob = prob * (1 - start_work[2])
+
+        for work in work_list:
+            if (work in target_state[1]) and (work not in start_list):
+                prob = prob * work[3]          # apareceu
+            if (work in target_state[1]) and (work in start_list):
+                prob = prob * (1 - work[4])    # não sumiu
+            if (work not in target_state[1]) and (work not in start_list):
+                prob = prob * (1 - work[3])    # não apareceu
+            if (work not in target_state[1]) and (work in start_list):
+                prob = prob * work[4]          # sumiu
 
         return prob
